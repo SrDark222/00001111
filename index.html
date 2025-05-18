@@ -1,263 +1,319 @@
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Painel Logs XSS - DKzin</title>
+<title>Painel XSS Neon Dark</title>
 <style>
-  /* Reset */
+  /* Reset básico */
   * {
     margin: 0; padding: 0; box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
+
   body {
-    background: linear-gradient(135deg, #1a1a1a, #2b2b2b);
-    color: #eee;
     min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a, #1a1a1a 60%, #121212);
+    overflow: hidden;
+    color: #eee;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
     padding: 20px;
-    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative;
   }
-  header {
-    font-size: 2rem;
-    font-weight: 900;
-    color: #e63946;
-    margin-bottom: 25px;
-    text-shadow: 0 0 10px #e63946aa;
+
+  /* Luzes neon de fundo animadas */
+  body::before, body::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.3;
+    animation: pulseNeon 6s ease-in-out infinite;
+    z-index: 0;
   }
+  body::before {
+    width: 350px; height: 350px;
+    background: #ff1a1a;
+    top: 10%;
+    left: 15%;
+  }
+  body::after {
+    width: 300px; height: 300px;
+    background: #660000;
+    bottom: 10%;
+    right: 20%;
+    animation-delay: 3s;
+  }
+  @keyframes pulseNeon {
+    0%, 100% {opacity: 0.3; transform: scale(1);}
+    50% {opacity: 0.6; transform: scale(1.1);}
+  }
+
+  /* Container com glass + blur + borda neon */
+  .container {
+    position: relative;
+    background: rgba(20, 20, 20, 0.6);
+    border-radius: 22px;
+    border: 2.5px solid #ff1a1a;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 0 15px 3px #ff0000,
+      0 0 30px 10px rgba(255, 0, 0, 0.25);
+    width: 460px;
+    max-width: 95vw;
+    overflow: hidden;
+    z-index: 10;
+  }
+
+  /* Nav das abas */
   nav {
     display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
+    background: rgba(30, 0, 0, 0.4);
+    border-bottom: 2px solid #ff1a1a;
+    user-select: none;
   }
-  nav button {
-    background: #222;
-    border: none;
-    padding: 12px 25px;
-    font-size: 1rem;
-    color: #ddd;
-    border-radius: 10px;
+
+  nav button.tab-button {
+    flex: 1;
+    padding: 18px 0;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 8px transparent;
+    background: transparent;
+    border: none;
+    color: #ff4c4c;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    transition: color 0.3s ease;
+    text-shadow:
+      0 0 4px #ff0000,
+      0 0 8px #ff0000;
   }
-  nav button:hover {
-    background: #e63946;
+
+  nav button.tab-button:hover {
+    color: #ff9999;
+  }
+
+  nav button.tab-button.active {
     color: #fff;
-    box-shadow: 0 0 12px #e63946;
+    background: linear-gradient(270deg, #ff0000, #cc0000, #ff0000);
+    background-size: 600% 600%;
+    animation: neon-gradient 5s ease infinite;
+    box-shadow:
+      0 0 15px #ff1a1a,
+      0 0 25px #ff4c4c,
+      0 0 35px #ff0000;
   }
-  nav button.active {
-    background: #e63946;
-    color: #fff;
-    box-shadow: 0 0 12px #e63946;
+
+  @keyframes neon-gradient {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
   }
-  main {
-    background: #1e1e1e;
-    width: 100%;
-    max-width: 720px;
-    border-radius: 14px;
-    box-shadow: 0 0 25px #e6394688;
-    padding: 25px;
-  }
+
+  /* Conteúdo das abas */
   section.tab-content {
     display: none;
-    animation: fadeIn 0.5s ease forwards;
+    padding: 30px 40px 35px 40px;
+    background: rgba(10, 10, 10, 0.6);
+    border-radius: 0 0 22px 22px;
+    color: #eee;
+    font-size: 15px;
+    line-height: 1.5;
+    box-shadow: inset 0 0 15px #330000;
+    min-height: 240px;
   }
   section.tab-content.active {
     display: block;
   }
-  h2 {
-    margin-bottom: 20px;
-    font-weight: 700;
-    color: #f1faee;
-    text-shadow: 0 0 6px #e63946aa;
-  }
-  textarea#logBox {
+
+  /* Inputs */
+  input[type="text"] {
     width: 100%;
-    height: 240px;
-    background: #2a2a2a;
-    border-radius: 12px;
-    border: none;
-    color: #eee;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1rem;
-    padding: 15px;
-    resize: vertical;
-    box-shadow: inset 0 0 10px #000000bb;
+    padding: 14px 18px;
+    margin-bottom: 25px;
+    border: 2px solid rgba(255, 0, 0, 0.7);
+    border-radius: 14px;
+    background: rgba(20, 20, 20, 0.35);
+    color: #ff6666;
+    font-weight: 600;
+    font-size: 16px;
+    outline: none;
+    box-shadow:
+      0 0 8px 2px rgba(255, 0, 0, 0.8);
+    transition: all 0.3s ease;
   }
-  input#webhookInput {
+  input[type="text"]:focus {
+    border-color: #ff3b3b;
+    background: rgba(40, 0, 0, 0.75);
+    color: #fff;
+    box-shadow:
+      0 0 18px 4px #ff2a2a;
+  }
+
+  /* Botões */
+  button {
     width: 100%;
-    padding: 14px 15px;
-    border-radius: 12px;
+    padding: 16px 0;
     border: none;
-    background: #2a2a2a;
-    color: #eee;
-    font-size: 1.1rem;
-    margin-bottom: 20px;
-    box-shadow: inset 0 0 10px #000000bb;
-  }
-  button.action-btn {
-    background: #e63946;
-    border: none;
-    padding: 12px 24px;
-    margin: 8px 10px 10px 0;
-    border-radius: 10px;
-    cursor: pointer;
+    border-radius: 20px;
+    background: linear-gradient(270deg, #ff0000, #cc0000, #ff0000);
+    background-size: 600% 600%;
+    animation: neon-gradient 5s ease infinite;
     color: white;
-    font-weight: 700;
-    box-shadow: 0 0 10px #e63946aa;
-    transition: background-color 0.3s ease;
+    font-weight: 900;
+    font-size: 17px;
+    cursor: pointer;
+    box-shadow:
+      0 0 20px #ff0000,
+      0 0 35px #ff4c4c;
+    transition: background-position 0.3s ease;
   }
-  button.action-btn:hover {
-    background: #d62828;
-    box-shadow: 0 0 15px #d62828cc;
+  button:hover {
+    background-position: 100% 50%;
   }
-  section p {
-    line-height: 1.6;
-    color: #ccc;
-    font-size: 1rem;
+
+  /* Títulos com glow forte e animação */
+  h2 {
+    color: #ff3b3b;
+    margin-bottom: 25px;
+    font-size: 26px;
+    font-weight: 900;
+    text-align: center;
+    letter-spacing: 3px;
+    text-shadow:
+      0 0 10px #ff2a2a,
+      0 0 30px #ff1a1a,
+      0 0 50px #ff0000;
+    animation: flickerNeon 2.5s infinite alternate;
   }
-  /* Animação simples */
-  @keyframes fadeIn {
-    from {opacity: 0;}
-    to {opacity: 1;}
+  @keyframes flickerNeon {
+    0%, 20%, 40%, 60%, 80%, 100% {opacity: 1;}
+    10%, 30%, 50%, 70%, 90% {opacity: 0.75;}
   }
-  /* Responsividade */
-  @media (max-width: 480px) {
-    nav {
-      flex-direction: column;
-    }
-    nav button {
-      width: 100%;
-    }
-    main {
-      padding: 15px;
-    }
+
+  /* Área de logs */
+  #logArea {
+    margin-top: 20px;
+    background: rgba(25, 0, 0, 0.85);
+    border: 2px solid #ff1a1a;
+    padding: 15px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    height: 110px;
+    overflow-y: auto;
+    border-radius: 18px;
+    color: #ff9999;
+    white-space: pre-wrap;
+    text-shadow:
+      0 0 4px #ff4c4c;
   }
 </style>
 </head>
 <body>
 
-<header>Painel de Logs XSS - DKzin</header>
+<div class="container" role="main" aria-label="Painel de Configuração XSS Neon Dark">
+  <nav role="tablist" aria-label="Navegação de abas">
+    <button class="tab-button active" data-tab="webhookTab" role="tab" aria-selected="true" aria-controls="webhookTab" id="tabWebhook">Webhook</button>
+    <button class="tab-button" data-tab="siteTab" role="tab" aria-selected="false" aria-controls="siteTab" id="tabSite">Site Alvo</button>
+  </nav>
 
-<nav role="tablist" aria-label="Navegação principal">
-  <button id="logTabBtn" role="tab" aria-controls="logTab" aria-selected="true" class="active" onclick="switchTab('logTab')">Logs</button>
-  <button id="webhookTabBtn" role="tab" aria-controls="webhookTab" aria-selected="false" onclick="switchTab('webhookTab')">Webhook</button>
-  <button id="aboutTabBtn" role="tab" aria-controls="aboutTab" aria-selected="false" onclick="switchTab('aboutTab')">Sobre</button>
-</nav>
-
-<main>
-  <section id="logTab" class="tab-content active" role="tabpanel" aria-labelledby="logTabBtn">
-    <h2>Logs Capturados</h2>
-    <textarea id="logBox" placeholder="Cole aqui os logs capturados..."></textarea>
-    <div>
-      <button class="action-btn" onclick="copyTokens()">Copiar Tokens</button>
-      <button class="action-btn" onclick="copyNames()">Copiar Nomes</button>
-      <button class="action-btn" onclick="copyIDs()">Copiar IDs</button>
-    </div>
-  </section>
-
-  <section id="webhookTab" class="tab-content" role="tabpanel" aria-labelledby="webhookTabBtn">
+  <section id="webhookTab" class="tab-content active" role="tabpanel" aria-labelledby="tabWebhook" tabindex="0">
     <h2>Configurar Webhook</h2>
-    <input type="text" id="webhookInput" placeholder="Cole o URL do webhook aqui..." aria-label="Input do webhook" />
-    <button class="action-btn" onclick="saveWebhook()">Salvar Webhook</button>
+    <input id="webhookInput" type="text" placeholder="Cole o webhook aqui..." autocomplete="off" aria-label="Campo para inserir webhook" />
+    <button onclick="saveWebhook()" aria-label="Salvar webhook">Salvar Webhook</button>
+</section>
+
+  <section id="siteTab" class="tab-content" role="tabpanel" aria-labelledby="tabSite" tabindex="0">
+    <h2>Link do Site para XSS</h2>
+    <input id="siteInput" type="text" placeholder="Cole o link do site alvo aqui..." autocomplete="off" aria-label="Campo para inserir link do site" />
+    <button onclick="saveSite()" aria-label="Salvar site alvo">Salvar Site</button>
   </section>
 
-  <section id="aboutTab" class="tab-content" role="tabpanel" aria-labelledby="aboutTabBtn">
-    <h2>Sobre o Painel</h2>
-    <p>Esse painel foi feito para monitorar e organizar os logs capturados de ataques XSS, com funções de copiar dados importantes e configurar envio via webhook.</p>
-    <p>Desenvolvido por DKzin, interface estilizada pelo Menor DK.</p>
-    <p>Use com responsabilidade.</p>
+  <section id="logsTab" class="tab-content" role="tabpanel" aria-labelledby="tabLogs" tabindex="0" style="display:none;">
+    <h2>Logs do XSS</h2>
+    <pre id="logArea" aria-live="polite" aria-atomic="true"></pre>
   </section>
-</main>
+</div>
 
 <script>
-  // Troca abas
-  function switchTab(tabId) {
-    const tabs = document.querySelectorAll('.tab-content');
-    const buttons = document.querySelectorAll('nav button');
+  // Controle simples de abas
+  const tabs = document.querySelectorAll('nav button.tab-button');
+  const contents = document.querySelectorAll('section.tab-content');
 
-    tabs.forEach(tab => {
-      if(tab.id === tabId) {
-        tab.classList.add('active');
-      } else {
-        tab.classList.remove('active');
-      }
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Remove ativo
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      contents.forEach(c => c.classList.remove('active'));
+
+      // Ativa o clicado e seu conteúdo
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      const id = tab.getAttribute('data-tab');
+      document.getElementById(id).classList.add('active');
     });
-
-    buttons.forEach(btn => {
-      if(btn.getAttribute('aria-controls') === tabId) {
-        btn.classList.add('active');
-        btn.setAttribute('aria-selected', 'true');
-      } else {
-        btn.classList.remove('active');
-        btn.setAttribute('aria-selected', 'false');
-      }
-    });
-  }
-
-  // Copiar texto para área de transferência com alertas
-  function copyToClipboard(text) {
-    if (!text || text.trim() === '') {
-      alert('Nada encontrado para copiar.');
-      return;
-    }
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Copiado para a área de transferência!');
-    }).catch(() => {
-      alert('Falha ao copiar para a área de transferência.');
-    });
-  }
-
-  // Extrair tokens do textarea (exemplo: token: qualquercoisa)
-  function copyTokens() {
-    const logs = document.getElementById('logBox').value;
-    const tokens = [...logs.matchAll(/token:\s*([^\s]+)/gi)].map(m => m[1]).join('\n');
-    copyToClipboard(tokens);
-  }
-
-  // Extrair nomes (exemplo: name: qualquercoisa)
-  function copyNames() {
-    const logs = document.getElementById('logBox').value;
-    const names = [...logs.matchAll(/name:\s*([^\s]+)/gi)].map(m => m[1]).join('\n');
-    copyToClipboard(names);
-  }
-
-  // Extrair IDs (exemplo: id: 123456789)
-  function copyIDs() {
-    const logs = document.getElementById('logBox').value;
-    const ids = [...logs.matchAll(/id:\s*(\d+)/gi)].map(m => m[1]).join('\n');
-    copyToClipboard(ids);
-  }
-
-  // Salvar webhook no localStorage
-  function saveWebhook() {
-    const webhookInput = document.getElementById('webhookInput');
-    const url = webhookInput.value.trim();
-    if (!url) {
-      alert('Por favor, insira um URL válido do webhook.');
-      return;
-    }
-    try {
-      new URL(url);
-    } catch {
-      alert('URL inválido.');
-      return;
-    }
-    localStorage.setItem('customWebhook', url);
-    alert('Webhook salvo com sucesso!');
-  }
-
-  // Carregar webhook salvo
-  window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('customWebhook');
-    if (saved) {
-      document.getElementById('webhookInput').value = saved;
-    }
   });
-</script>
 
-</body>
-</html>
+  // Função pra salvar webhook no localStorage e logar
+  function saveWebhook() {
+    const webhook = document.getElementById('webhookInput').value.trim();
+    if (!webhook) return alert('Cole um webhook válido, chefe!');
+    localStorage.setItem('xssWebhook', webhook);
+    logMsg(`Webhook salvo: ${webhook}`);
+  }
+
+  // Função pra salvar site alvo
+  function saveSite() {
+    const site = document.getElementById('siteInput').value.trim();
+    if (!site) return alert('Cole um link válido do site alvo!');
+    localStorage.setItem('xssSite', site);
+    logMsg(`Site alvo salvo: ${site}`);
+  }
+
+  // Função pra logar mensagens na área de logs
+  function logMsg(msg) {
+    let logArea = document.getElementById('logArea');
+    if (!logArea) {
+      // Se ainda não existe, cria e mostra aba logs
+      const logsTabBtn = document.createElement('button');
+      logsTabBtn.classList.add('tab-button');
+      logsTabBtn.setAttribute('data-tab', 'logsTab');
+      logsTabBtn.setAttribute('role', 'tab');
+      logsTabBtn.setAttribute('aria-selected', 'false');
+      logsTabBtn.id = 'tabLogs';
+      logsTabBtn.textContent = 'Logs';
+      document.querySelector('nav').appendChild(logsTabBtn);
+      logsTabBtn.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        contents.forEach(c => c.classList.remove('active'));
+        logsTabBtn.classList.add('active');
+        logsTabBtn.setAttribute('aria-selected', 'true');
+        document.getElementById('logsTab').classList.add('active');
+      });
+      logArea = document.getElementById('logArea');
+      if (!logArea) return; // Falha
+    }
+    logArea.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+    logArea.scrollTop = logArea.scrollHeight;
+  }
+
+  // Recupera dados salvos ao abrir
+  window.onload = () => {
+    const savedWebhook = localStorage.getItem('xssWebhook');
+    if (savedWebhook) document.getElementById('webhookInput').value = savedWebhook;
+    const savedSite = localStorage.getItem('xssSite');
+    if (savedSite) document.getElementById('siteInput').value = savedSite;
+  }
+</script>
