@@ -1,49 +1,271 @@
-<!DOCTYPE html><html lang="pt-br">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XSS Logger Pro</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard Neon Azul</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+  /* Reset básico */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #cce7ff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem;
+  }
+
+  .container {
+    background: rgba(10, 20, 35, 0.7);
+    backdrop-filter: blur(12px);
+    border-radius: 15px;
+    width: 100%;
+    max-width: 900px;
+    box-shadow: 0 0 15px #00aaffaa inset, 0 0 30px #0088ffaa;
+    display: flex;
+    flex-direction: column;
+    min-height: 600px;
+  }
+
+  /* Abas topo */
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid #005f99;
+    user-select: none;
+  }
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 1rem 0;
+    cursor: pointer;
+    font-weight: 700;
+    color: #77bbff;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+  }
+
+  .tab:hover {
+    color: #a0d8ff;
+  }
+
+  .tab.active {
+    color: #00bfff;
+    border-bottom: 3px solid #00bfff;
+    box-shadow: 0 3px 8px #00bfffaa;
+  }
+
+  /* Conteúdo das abas */
+  .tab-content {
+    flex: 1;
+    padding: 2rem;
+    display: none;
+    color: #ddeeff;
+    overflow-y: auto;
+  }
+
+  .tab-content.active {
+    display: block;
+    animation: fadeIn 0.4s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+
+  /* Inputs com sombra interna e blur */
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    margin-top: 0.6rem;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: #cce7ff;
+    box-shadow: inset 0 0 10px #00bfff88;
+    backdrop-filter: blur(6px);
+    font-size: 1rem;
+    transition: box-shadow 0.3s ease;
+  }
+
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    box-shadow: inset 0 0 20px #00d0ffcc;
+    background: rgba(255,255,255,0.15);
+  }
+
+  /* Botões */
+  button {
+    margin-top: 1rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(45deg, #007acc, #00d4ff);
+    color: #e0f7ff;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 0 8px #00bfffaa;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+
+  button:hover {
+    background: linear-gradient(45deg, #00bfff, #00f0ff);
+    box-shadow: 0 0 16px #00f0ffcc;
+  }
+
+  /* Caixas de texto com bordas neon e sombra interna */
+  .box {
+    background: rgba(5, 15, 35, 0.5);
+    border-radius: 15px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow:
+      inset 0 0 15px #00bfff88,
+      0 0 20px #005f99aa;
+  }
+
+  /* Scrollbar estilizado */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(5, 15, 35, 0.3);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #00bfffcc;
+    border-radius: 10px;
+  }
+
+  /* Responsividade */
+  @media (max-width: 640px) {
+    .container {
+      padding: 1rem;
+      min-height: 500px;
+    }
+    .tab {
+      font-size: 0.9rem;
+      padding: 0.8rem 0;
+    }
+    button {
+      width: 100%;
+    }
+  }
+</style>
 </head>
-<body oncontextmenu="return false">
-  <div class="container">
-    <header class="header">
-      <h1 class="title">XSS Logger Pro</h1>
-      <nav class="tabs">
-        <button class="tab-btn active" data-tab="principal">Principal</button>
-        <button class="tab-btn" data-tab="webhook">Webhook</button>
-        <button class="tab-btn" data-tab="logs">Logs</button>
-        <button class="tab-btn" data-tab="config">Configuração</button>
-      </nav>
-    </header><main class="content">
-  <section id="principal" class="tab-page active">
-    <h2>Início</h2>
-    <p>Configure seu logger XSS com abas organizadas e visuais neon responsivos.</p>
-  </section>
+<body>
 
-  <section id="webhook" class="tab-page">
-    <h2>Webhook</h2>
-    <input type="text" id="webhookInput" placeholder="Cole seu Webhook" class="input-box" />
-    <button class="action-btn" onclick="saveWebhook()">Salvar</button>
-    <p id="webhookStatus"></p>
-  </section>
+<div class="container">
+  <nav class="tabs" role="tablist" aria-label="Navegação do Dashboard">
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="principal" id="tab-principal" tabindex="0">Principal</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="webhook" id="tab-webhook" tabindex="-1">Webhook Definido</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="logs" id="tab-logs" tabindex="-1">Logs</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="config" id="tab-config" tabindex="-1">Configuração</button>
+  </nav>
 
-  <section id="logs" class="tab-page">
-    <h2>Logs Recebidos</h2>
-    <div id="logContainer" class="log-area">
-      <p>Nenhum log ainda...</p>
+  <section id="principal" class="tab-content active" role="tabpanel" aria-labelledby="tab-principal" tabindex="0">
+    <div class="box">
+      <h2>Bem-vindo ao Painel Principal</h2>
+      <p>Resumo rápido das operações e status do sistema.</p>
+      <input type="text" placeholder="Digite algo aqui..." />
+      <button>Enviar</button>
     </div>
   </section>
 
-  <section id="config" class="tab-page">
-    <h2>Configuração de Site</h2>
-    <input type="text" id="targetInput" placeholder="https://site-alvo.com" class="input-box" />
-    <button class="action-btn" onclick="saveTarget()">Salvar Link</button>
-    <p id="targetStatus"></p>
+  <section id="webhook" class="tab-content" role="tabpanel" aria-labelledby="tab-webhook" tabindex="0">
+    <div class="box">
+      <h2>Webhook Definido</h2>
+      <input id="webhookUrl" type="text" placeholder="Cole o link do webhook aqui" />
+      <button id="saveWebhook">Salvar Webhook</button>
+    </div>
   </section>
-</main>
 
-  </div>
+  <section id="logs" class="tab-content" role="tabpanel" aria-labelledby="tab-logs" tabindex="0">
+    <div class="box" style="height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.9rem; background: rgba(0,0,0,0.25);">
+      <h2>Logs do Sistema</h2>
+      <pre id="logContent">Nenhum log registrado ainda.</pre>
+    </div>
+  </section>
+
+  <section id="config" class="tab-content" role="tabpanel" aria-labelledby="tab-config" tabindex="0">
+    <div class="box">
+      <h2>Configuração do Sistema</h2>
+      <label for="xssTarget">Link do site para aplicar XSS:</label>
+      <input id="xssTarget" type="text" placeholder="https://exemplo.com" />
+      <button id="applyXSS">Aplicar XSS</button>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Gerenciar troca de abas com acessibilidade e foco
+  const tabs = document.querySelectorAll('.tab');
+  const contents = document.querySelectorAll('.tab-content');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Remover active das abas
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+        t.tabIndex = -1;
+      });
+
+      // Remover active dos conteúdos
+      contents.forEach(c => c.classList.remove('active'));
+
+      // Ativar aba clicada e conteúdo associado
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      tab.tabIndex = 0;
+      const id = tab.getAttribute('aria-controls');
+      document.getElementById(id).classList.add('active');
+      document.getElementById(id).focus();
+    });
+  });
+
+  // Funções simples para botões (exemplo)
+  document.getElementById('saveWebhook').addEventListener('click', () => {
+    const url = document.getElementById('webhookUrl').value.trim();
+    if (!url) {
+      alert('Por favor, insira um webhook válido.');
+      return;
+    }
+    alert('Webhook salvo: ' + url);
+    // Salvar no localStorage ou enviar para backend
+    localStorage.setItem('webhookUrl', url);
+  });
+
+  document.getElementById('applyXSS').addEventListener('click', () => {
+    const target = document.getElementById('xssTarget').value.trim();
+    if (!target) {
+      alert('Por favor, insira o link do site para aplicar XSS.');
+      return;
+    }
+    alert('XSS aplicado no site: ' + target);
+    // Implementar lógica de XSS via backend/api aqui
+  });
+
+  // Recuperar webhook salvo ao carregar página
+  window.onload = () => {
+    const savedWebhook = localStorage.getItem('webhookUrl');
+    if (savedWebhook) {
+      document.getElementById('webhookUrl').value = savedWebhook;
+    }
+  };
+</script>
+
 </body>
 </html>
