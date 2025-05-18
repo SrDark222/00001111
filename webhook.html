@@ -1,83 +1,28 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Webhook | Painel DK</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webhook - DKZIN</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="painel">
+    <h1>Webhook - DKZIN</h1>
 
-  <!-- MENU -->
-  <nav class="menu-top">
-    <a href="index.html">Principal</a>
-    <a href="webhook.html">Webhook</a>
-    <a href="logs.html">Logs</a>
-    <a href="config.html">Configuração</a>
-  </nav>
-
-  <!-- CONTEÚDO -->
-  <main class="conteudo">
-    <h1>Configurar Webhook</h1>
-
-    <div style="margin-top: 30px;">
-      <label for="webhook-url">URL do Webhook:</label><br><br>
-      <input type="text" id="webhook-url" style="width: 80%; padding: 10px; border-radius: 10px; border: none;" placeholder="https://discord.com/api/webhooks/..."><br><br>
-
-      <button onclick="salvarWebhook()" style="padding: 10px 25px; border-radius: 10px; background: #00f7ff; color: black; font-weight: bold;">Salvar</button>
-      <button onclick="testarWebhook()" style="padding: 10px 25px; border-radius: 10px; background: #7d5fff; color: white; font-weight: bold; margin-left: 10px;">Testar Envio</button>
+    <div class="abas">
+      <a href="webhook.html" class="aba-botao ativa">Webhook</a>
+      <a href="xss.html" class="aba-botao">XSS</a>
+      <a href="index.html" class="aba-botao">Início</a>
     </div>
 
-    <p id="status-msg" style="margin-top: 20px; color: #6df;"></p>
-  </main>
+    <label>Salvar Webhook</label>
+    <input type="text" placeholder="https://discord.com/api/webhooks/..." />
+    <button class="botao">Salvar Webhook</button>
 
-  <script>
-    const webhookInput = document.getElementById("webhook-url");
-    const statusMsg = document.getElementById("status-msg");
-
-    // Puxa do localStorage se já tiver salvo
-    window.onload = () => {
-      const saved = localStorage.getItem("webhook_url");
-      if (saved) webhookInput.value = saved;
-    }
-
-    function salvarWebhook() {
-      const url = webhookInput.value.trim();
-      if (!url.startsWith("https://discord.com/api/webhooks/")) {
-        statusMsg.innerText = "Webhook inválido!";
-        return;
-      }
-      localStorage.setItem("webhook_url", url);
-      statusMsg.innerText = "Webhook salvo com sucesso!";
-    }
-
-    function testarWebhook() {
-      const url = localStorage.getItem("webhook_url");
-      if (!url) {
-        statusMsg.innerText = "Nenhum webhook salvo.";
-        return;
-      }
-
-      fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: "Painel DK",
-          avatar_url: "https://i.imgur.com/2Nfuz2K.png",
-          content: "Webhook testado com sucesso pelo Painel DK!"
-        })
-      })
-      .then(res => {
-        if (res.ok) {
-          statusMsg.innerText = "Mensagem enviada!";
-        } else {
-          statusMsg.innerText = "Falha ao enviar webhook.";
-        }
-      })
-      .catch(err => {
-        statusMsg.innerText = "Erro ao conectar.";
-      });
-    }
-  </script>
+    <label>Salvar Link do Site</label>
+    <input type="text" placeholder="https://www.roblox.com/..." />
+    <button class="botao">Salvar Site</button>
+  </div>
 </body>
 </html>
