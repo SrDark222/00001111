@@ -1,56 +1,23 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DK Painel XSS</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>Painel XSS - DKZIN</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="https://cdn.discordapp.com/attachments/1362086835764855018/1373802547923517470/1741234456424.png.ico" type="image/x-icon">
 </head>
 <body>
-  <div id="loading-screen">
-    <div class="loader">
-      <h1>Carregando...</h1>
-      <div class="progress-bar">
-        <div class="progress"></div>
-      </div>
+  <div class="painel">
+    <h1>Painel XSS - DKZIN</h1>
+    
+    <div class="abas">
+      <a href="webhook.html" class="aba-botao">Webhook</a>
+      <a href="xss.html" class="aba-botao">XSS</a>
+      <a href="index.html" class="aba-botao ativa">Início</a>
     </div>
-  </div>  <nav class="navbar">
-    <a href="#principal" class="tablink">Principal</a>
-    <a href="#webhook" class="tablink">Webhook</a>
-    <a href="#logs" class="tablink">Logs</a>
-    <a href="#config" class="tablink">Configuração</a>
-  </nav>  <main id="main-content">
-    <section id="principal" class="tab-content active">
-      <h2>Principal</h2>
-      <p>Interface principal do Painel DK</p>
-    </section><section id="webhook" class="tab-content">
-  <h2>Definir Webhook</h2>
-  <input type="text" id="webhookInput" placeholder="Cole seu webhook aqui...">
-  <button onclick="saveWebhook()">Salvar</button>
-  <button onclick="testWebhook()">Testar Envio</button>
-</section>
 
-<section id="logs" class="tab-content">
-  <h2>Logs</h2>
-  <div id="logContainer">Nenhum log ainda.</div>
-</section>
-
-<section id="config" class="tab-content">
-  <h2>Configurações</h2>
-  <div class="toggle-group">
-    <div class="toggle">
-      <label>Modo Sombrio</label>
-      <input type="checkbox" id="darkModeToggle" checked>
-    </div>
-    <div class="toggle">
-      <label>Notificações</label>
-      <input type="checkbox" id="notificationToggle">
-    </div>
-    <div class="toggle">
-      <label>Auto Atualizar Logs</label>
-      <input type="checkbox" id="autoUpdateLogs">
-    </div>
+    <p style="color:white;text-align:center;margin-top:20px;">Escolha uma aba acima para começar</p>
   </div>
-</section>
-
-  </main>  <script src="js/script.js"></script></body>
+</body>
 </html>
