@@ -1,0 +1,16 @@
+async function saveWebhookServer() {
+  const url = document.getElementById('webhookInput').value.trim();
+  if (!url) return alert('Insira webhook');
+  try {
+    const res = await fetch('http://localhost:3000/api/webhook', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ webhookUrl: url }),
+    });
+    const data = await res.json();
+    if (res.ok) alert(data.message);
+    else alert(data.error);
+  } catch (e) {
+    alert('Erro na requisição: ' + e.message);
+  }
+}
