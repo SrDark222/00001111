@@ -1,23 +1,193 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel XSS - DKZIN</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="icon" href="https://cdn.discordapp.com/attachments/1362086835764855018/1373802547923517470/1741234456424.png.ico" type="image/x-icon">
+  <title>DK Painel XSS</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #000000, #1a1a1a);
+      color: #f0f0f0;
+      overflow-x: hidden;
+    }
+
+    #loading-screen {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .loader h1 {
+      font-size: 2em;
+      color: #7f00ff;
+      text-shadow: 0 0 10px #7f00ff;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      width: 300px;
+      height: 10px;
+      background: #2a2a2a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #7f00ff, #00c6ff);
+      animation: load 2s infinite alternate;
+    }
+
+    @keyframes load {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: center;
+      background: rgba(0, 0, 30, 0.6);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 102, 204, 0.4);
+      padding: 15px 0;
+    }
+
+    .navbar a {
+      color: #ccc;
+      text-decoration: none;
+      margin: 0 20px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .navbar a:hover, .navbar a.active {
+      background: rgba(0, 0, 50, 0.4);
+      color: #00c6ff;
+      box-shadow: 0 0 10px #00c6ff;
+    }
+
+    #main-content {
+      padding: 40px;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 80%;
+      border: none;
+      border-radius: 8px;
+      margin: 10px 0;
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      outline: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #7f00ff, #00c6ff);
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, #00c6ff, #7f00ff);
+    }
+  </style>
 </head>
 <body>
-  <div class="painel">
-    <h1>Painel XSS - DKZIN</h1>
-
-    <div class="abas">
-      <a href="webhook.html" class="aba-botao">Webhook</a>
-      <a href="xss.html" class="aba-botao">XSS</a>
-      <a href="index.html" class="aba-botao ativa">Início</a>
+  <div id="loading-screen">
+    <div class="loader">
+      <h1>Carregando...</h1>
+      <div class="progress-bar">
+        <div class="progress"></div>
+      </div>
     </div>
-
-    <p style="color:white;text-align:center;margin-top:20px;">Escolha uma aba acima para começar</p>
   </div>
+
+  <nav class="navbar">
+    <a href="#principal" class="tablink active">Principal</a>
+    <a href="#webhook" class="tablink">Webhook</a>
+    <a href="#logs" class="tablink">Logs</a>
+    <a href="#config" class="tablink">Configuração</a>
+  </nav>
+
+  <main id="main-content">
+    <section id="principal" class="tab-content active">
+      <h2>Principal</h2>
+      <p>Interface principal do Painel DK</p>
+    </section>
+
+    <section id="webhook" class="tab-content">
+      <h2>Definir Webhook</h2>
+      <input type="text" id="webhookInput" placeholder="Cole seu webhook aqui...">
+      <button onclick="saveWebhook()">Salvar</button>
+    </section>
+
+    <section id="logs" class="tab-content">
+      <h2>Logs</h2>
+      <div id="logContainer">Nenhum log ainda.</div>
+    </section>
+
+    <section id="config" class="tab-content">
+      <h2>Configurações</h2>
+      <p>Opções adicionais e configurações do painel</p>
+    </section>
+  </main>
+
+  <script>
+    document.querySelectorAll('.tablink').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tablink').forEach(link => link.classList.remove('active'));
+        const target = e.target.getAttribute('href').substring(1);
+        document.getElementById(target).classList.add('active');
+        e.target.classList.add('active');
+      });
+    });
+
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loading-screen').style.display = 'none';
+      }, 2000);
+    });
+
+    function saveWebhook() {
+      const webhook = document.getElementById('webhookInput').value;
+      localStorage.setItem('webhook', webhook);
+      alert('Webhook salvo com sucesso!');
+    }
+  </script>
 </body>
 </html>
