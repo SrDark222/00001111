@@ -3,51 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Painel XSS Neon</title>
+  <title>Painel Neon XSS</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <!-- Tela de Carregamento -->
-  <div class="loader-overlay" id="loader">
+  <div class="loader" id="loader">
     <div class="loader-box">
       <h2>Carregando...</h2>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-bar"><div class="progress" id="progress"></div></div>
     </div>
   </div>
 
   <!-- Navbar -->
   <nav class="navbar">
-    <a href="#principal" class="tab-btn active">Principal</a>
-    <a href="#webhook" class="tab-btn">Webhook</a>
-    <a href="#logs" class="tab-btn">Logs</a>
-    <a href="#config" class="tab-btn">Configuração</a>
+    <a href="#principal" class="tab active">Principal</a>
+    <a href="#webhook" class="tab">Webhook</a>
+    <a href="#logs" class="tab">Logs</a>
+    <a href="#config" class="tab">Configuração</a>
   </nav>
 
-  <!-- Abas -->
-  <main class="container">
-    <section id="principal" class="tab-section active">
-      <h2>Principal</h2>
-      <p>Este é o painel principal. Aguarde o retorno dos dados de XSS.</p>
+  <!-- Conteúdo -->
+  <main class="content">
+    <section id="principal" class="tab-content active">
+      <h2>Painel Principal</h2>
+      <p>Esperando retorno do script XSS...</p>
     </section>
 
-    <section id="webhook" class="tab-section">
+    <section id="webhook" class="tab-content">
       <h2>Webhook</h2>
-      <input type="text" placeholder="Cole seu Webhook aqui..." id="webhookInput"/>
-      <button onclick="saveWebhook()">Salvar Webhook</button>
+      <input type="text" placeholder="Cole o webhook aqui" id="webhookInput">
+      <button onclick="saveWebhook()">Salvar</button>
     </section>
 
-    <section id="logs" class="tab-section">
+    <section id="logs" class="tab-content">
       <h2>Logs</h2>
-      <div class="log-box" id="logBox">Nenhum log ainda...</div>
+      <div id="logBox" class="log-box">Nenhum log ainda.</div>
     </section>
 
-    <section id="config" class="tab-section">
-      <h2>Configuração</h2>
-      <input type="text" placeholder="URL do alvo XSS" id="xssTarget"/>
+    <section id="config" class="tab-content">
+      <h2>Configurações</h2>
+      <input type="text" placeholder="URL do alvo XSS" id="xssInput">
       <button onclick="startXSS()">Iniciar XSS</button>
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <script>
+    // Tela de carregamento
+    window.addEventListener('load', () => {
+      const loader = document.getElementById("loader");
+      setTimeout(() => loader.classList.add("hide"), 3000);
+    });
+
+    // Tabs
+    const tabs = document.querySelectorAll(".tab");
+    const contents = document.querySelectorAll(".tab-content");
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        contents.forEach(c => c.classList.remove("active"));
+
+        tab.classList.add("active");
+        document.querySelector(tab.getAttribute("href")).classList.add("active");
+      });
+    });
+
+    // Webhook
+    function saveWebhook() {
+      const input = document.getElementById("webhookInput").value;
+      localStorage.setItem("webhook", input);
+      alert("Webhook salvo.");
+    }
+
+    // XSS Start (fake)
+    function startXSS() {
+      const target = document.getElementById("xssInput").value;
+      const logs = document.getElementById("logBox");
+      logs.innerHTML += `<p>Injetando XSS em: ${target}</p>`;
+    }
+  </script>
 </body>
 </html>
