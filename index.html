@@ -3,8 +3,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DK Painel XSS</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="script.js" defer></script>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div id="loading-screen">
@@ -27,7 +26,7 @@
   <h2>Definir Webhook</h2>
   <input type="text" id="webhookInput" placeholder="Cole seu webhook aqui...">
   <button onclick="saveWebhook()">Salvar</button>
-  <button onclick="testWebhook()">Testar</button>
+  <button onclick="testWebhook()">Testar Envio</button>
 </section>
 
 <section id="logs" class="tab-content">
@@ -37,12 +36,21 @@
 
 <section id="config" class="tab-content">
   <h2>Configurações</h2>
-  <h3>Preferências de Interface</h3>
-  <label class="toggle">Modo Escuro <input type="checkbox" onchange="toggleDarkMode()"></label>
-  <h3>Notificações</h3>
-  <label class="toggle">Ativar alertas <input type="checkbox" onchange="toggleAlerts()"></label>
+  <div class="toggle-group">
+    <div class="toggle">
+      <label>Modo Sombrio</label>
+      <input type="checkbox" id="darkModeToggle" checked>
+    </div>
+    <div class="toggle">
+      <label>Notificações</label>
+      <input type="checkbox" id="notificationToggle">
+    </div>
+    <div class="toggle">
+      <label>Auto Atualizar Logs</label>
+      <input type="checkbox" id="autoUpdateLogs">
+    </div>
+  </div>
 </section>
 
-  </main>
-</body>
+  </main>  <script src="js/script.js"></script></body>
 </html>
