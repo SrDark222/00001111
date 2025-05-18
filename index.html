@@ -1,44 +1,51 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XSS Logger Neon</title>
+  <title>XSS Logger Pro</title>
   <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
 </head>
 <body oncontextmenu="return false">
   <header>
-    <h1>XSS Logger</h1>
+    <h1>XSS Logger Pro</h1>
     <nav class="tabs">
-      <button class="tab-button active" data-tab="webhook">Webhook</button>
-      <button class="tab-button" data-tab="site">Alvo XSS</button>
-      <button class="tab-button" data-tab="logs">Logs</button>
+      <button class="tab-btn active" data-tab="principal">Principal</button>
+      <button class="tab-btn" data-tab="webhook">Webhook Definido</button>
+      <button class="tab-btn" data-tab="logs">Logs</button>
+      <button class="tab-btn" data-tab="config">Configuração</button>
     </nav>
   </header>
 
   <main>
-    <section id="webhook" class="tab-content active">
-      <h2>Webhook</h2>
-      <input type="text" id="webhookInput" placeholder="Cole seu Webhook do Discord">
-      <button onclick="saveWebhook()">Salvar Webhook</button>
+    <section id="principal" class="tab-page active">
+      <h2>Início</h2>
+      <p>Este painel permite configurar seu logger XSS personalizado.</p>
+      <p>Utilize as abas acima para definir webhook, site alvo e visualizar logs recebidos.</p>
     </section>
 
-    <section id="site" class="tab-content">
-      <h2>Link do Site-Alvo</h2>
-      <input type="text" id="siteInput" placeholder="https://exemplo.com">
-      <button onclick="gerarScript()">Gerar Código XSS</button>
-      <pre id="xssCode"></pre>
+    <section id="webhook" class="tab-page">
+      <h2>Webhook Definido</h2>
+      <input type="text" id="webhookInput" placeholder="Cole seu Webhook" />
+      <button onclick="saveWebhook()">Salvar</button>
+      <p id="webhookStatus"></p>
     </section>
 
-    <section id="logs" class="tab-content">
+    <section id="logs" class="tab-page">
       <h2>Logs Recebidos</h2>
-      <div id="logOutput"></div>
+      <div id="logContainer">
+        <p>Nenhum log ainda...</p>
+      </div>
+    </section>
+
+    <section id="config" class="tab-page">
+      <h2>Configuração de Site Alvo</h2>
+      <input type="text" id="targetInput" placeholder="https://site-alvo.com" />
+      <button onclick="saveTarget()">Salvar Link</button>
+      <p id="targetStatus"></p>
     </section>
   </main>
 
-  <footer>
-    <small>&copy; XSS Logger by DK</small>
-  </footer>
+  <script src="script.js"></script>
 </body>
 </html>
