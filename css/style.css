@@ -1,100 +1,103 @@
-body {
+/* Reset e Base */
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #050d1f, #0a0e2e);
-  color: white;
-  overflow: hidden;
+}
+body {
+  background: linear-gradient(145deg, #0b0f1e, #141a2f);
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px;
+  overflow-x: hidden;
 }
 
-.menu-top {
+/* Navegação */
+.nav-bar {
   display: flex;
-  justify-content: center;
-  gap: 25px;
-  background: rgba(10, 20, 40, 0.3);
-  backdrop-filter: blur(8px);
-  padding: 15px 0;
-  border-bottom: 1px solid #00f7ff40;
-  box-shadow: 0 5px 10px #00f7ff22;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.menu-top a {
-  color: #00f7ff;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 16px;
-  padding: 6px 20px;
+  gap: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 12px 20px;
   border-radius: 12px;
-  transition: all 0.2s ease;
-}
-
-.menu-top a:hover {
-  background: #00f7ff33;
-  box-shadow: 0 0 12px #00f7ff88;
-}
-
-#loading-screen {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(5, 10, 30, 0.85);
   backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: fadein 1s ease-in-out;
+  box-shadow: 0 0 10px #00b3ff55;
+}
+.tab-link {
+  text-decoration: none;
+  color: #ffffffcc;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+.tab-link:hover {
+  color: #00cfff;
+  text-shadow: 0 0 10px #00f7ff;
 }
 
-.loader-card {
-  background: rgba(20, 25, 50, 0.9);
-  border: 2px solid #00f7ff;
+/* Container principal */
+.container {
+  max-width: 480px;
+  margin: 80px auto;
   padding: 30px;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 0 20px #00b3ff88;
   text-align: center;
-  box-shadow: 0 0 25px #00f7ff66;
-  color: white;
-  width: 350px;
 }
 
-.loader-card h2 {
-  font-size: 22px;
-  margin-bottom: 10px;
-  color: #6df;
-  text-shadow: 0 0 6px #00f7ff;
+/* Título neon */
+.glow-text {
+  font-size: 32px;
+  font-weight: bold;
+  color: #e0f0ff;
+  text-shadow: 0 0 8px #00b3ff, 0 0 15px #0066ff;
+  margin-bottom: 15px;
+}
+.description {
+  color: #ccc;
+  margin-bottom: 30px;
 }
 
-.progress-bar {
+/* Inputs */
+input[type="text"] {
   width: 100%;
-  height: 6px;
-  background: #222;
-  border-radius: 5px;
-  overflow: hidden;
-  margin-top: 20px;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(20, 30, 50, 0.8);
+  color: #fff;
+  outline: none;
+  font-size: 16px;
+  margin-bottom: 20px;
+  box-shadow: inset 0 0 6px #00b3ff66;
+}
+input:focus {
+  box-shadow: 0 0 12px #00cfff99;
 }
 
-.progress-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #00f7ff, #7d5fff, #00fff7);
-  animation: progressLoad 3s ease-in-out forwards;
+/* Botões */
+button {
+  padding: 12px 24px;
+  background: linear-gradient(to right, #0055ff, #00d4ff);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00b3ff88;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #00e1ffcc;
 }
 
-@keyframes progressLoad {
-  0% { width: 0%; }
-  100% { width: 100%; }
+/* Animações */
+.fade-in {
+  animation: fadeIn 1.2s ease-in-out;
 }
-
-@keyframes fadein {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-main.conteudo {
-  padding: 100px 20px;
-  text-align: center;
-  font-size: 18px;
-  animation: fadein 2s ease;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
