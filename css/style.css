@@ -1,4 +1,4 @@
-/* Base reset */
+/* Reset */
 * {
   margin: 0;
   padding: 0;
@@ -7,130 +7,119 @@
 }
 
 body {
-  background: linear-gradient(145deg, #000000, #0a0a0f, #1a1a1a);
-  color: #e0e0ff;
-  min-height: 100vh;
+  background: #000;
+  color: #eee;
   overflow-x: hidden;
+}
+
+/* Tela de carregamento */
+.loader {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  animation: fadeOut 1s 3s forwards;
+}
+.loader.hide {
+  display: none;
+}
+.loader-box {
+  background: rgba(15, 15, 25, 0.6);
+  border: 2px solid #00f2ff;
+  box-shadow: 0 0 20px #00f2ff, inset 0 0 10px #4b00ff;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+}
+.progress-bar {
+  margin-top: 20px;
+  height: 10px;
+  background: #111;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #00f2ff, #4b00ff);
+  animation: fillBar 2.5s forwards;
+}
+@keyframes fillBar {
+  to { width: 100%; }
+}
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
 }
 
 /* Navbar */
 .navbar {
   display: flex;
   justify-content: space-around;
-  background: rgba(0, 0, 20, 0.4);
-  backdrop-filter: blur(10px);
-  padding: 10px;
-  border-bottom: 2px solid #0ff;
+  background: rgba(20, 20, 40, 0.6);
+  backdrop-filter: blur(15px);
+  padding: 15px;
+  border-bottom: 1px solid #00f2ff66;
 }
-
-.tab-btn {
-  color: #ccc;
+.tab {
+  color: #aaa;
   text-decoration: none;
-  font-weight: bold;
-  padding: 10px 15px;
-  border-radius: 10px;
-  transition: all 0.3s;
+  padding: 10px 20px;
+  border-radius: 12px;
+  transition: 0.3s;
 }
-.tab-btn:hover,
-.tab-btn.active {
-  background: linear-gradient(90deg, #00f2ff, #4b00ff);
-  color: white;
-  box-shadow: 0 0 10px #00f2ff;
+.tab:hover, .tab.active {
+  color: #fff;
+  background: linear-gradient(135deg, #00f2ff66, #4b00ff66);
+  box-shadow: 0 0 10px #00f2ffaa;
 }
 
-/* Tela de Carregamento */
-.loader-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000000dd;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  animation: fadeOut 1s ease forwards;
-  animation-delay: 3s;
-}
-
-.loader-box {
-  background: rgba(10,10,20,0.6);
-  border: 2px solid #00f2ff;
-  box-shadow: 0 0 20px #00f2ff;
-  padding: 30px;
-  border-radius: 20px;
-  text-align: center;
-  color: white;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 10px;
-  background: #222;
-  margin-top: 20px;
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  width: 0%;
-  height: 100%;
-  background: linear-gradient(90deg, #00f2ff, #4b00ff);
-  animation: fillProgress 2.5s ease forwards;
-}
-
-@keyframes fillProgress {
-  to { width: 100%; }
-}
-
-@keyframes fadeOut {
-  to { opacity: 0; visibility: hidden; }
-}
-
-/* Container */
-.container {
+/* Conteúdo */
+.content {
   padding: 20px;
 }
-
-/* Abas */
-.tab-section {
+.tab-content {
   display: none;
-  animation: fadeIn 0.4s ease;
-  margin-top: 20px;
-  background: rgba(10, 10, 20, 0.5);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
+  background: rgba(20, 20, 40, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid #333;
+  box-shadow: inset 0 0 30px #000000cc, 0 0 15px #00f2ff33;
   padding: 30px;
-  border: 1px solid #2f2f4f;
-  box-shadow: inset 0 0 20px #000000cc, 0 0 20px #00f2ff44;
+  border-radius: 20px;
+  margin-top: 20px;
 }
-.tab-section.active {
+.tab-content.active {
   display: block;
+  animation: fadeIn 0.5s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: translateY(0);}
 }
 
 input[type="text"] {
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
-  background: #1c1c2e;
+  background: #0f0f1f;
+  border: 1px solid #00f2ff88;
   color: #fff;
-  border: 1px solid #00f2ff;
   border-radius: 10px;
-  box-shadow: inset 0 0 10px #00000099;
+  margin-top: 10px;
   outline: none;
 }
-
 button {
   margin-top: 10px;
   padding: 12px 20px;
-  background: linear-gradient(90deg, #00f2ff, #4b00ff);
-  border: none;
+  background: linear-gradient(to right, #00f2ff, #4b00ff);
   color: white;
+  border: none;
   border-radius: 12px;
   box-shadow: 0 0 15px #00f2ff88;
   cursor: pointer;
-  transition: 0.3s ease;
+  transition: 0.3s;
 }
 button:hover {
   transform: scale(1.05);
@@ -141,13 +130,8 @@ button:hover {
   background: #111;
   padding: 15px;
   border-radius: 10px;
-  border: 1px solid #444;
-  min-height: 100px;
+  border: 1px solid #333;
+  margin-top: 10px;
+  max-height: 200px;
   overflow-y: auto;
-}
-
-/* Fade anim */
-@keyframes fadeIn {
-  from {opacity: 0;}
-  to {opacity: 1;}
-}
+  }
