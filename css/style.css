@@ -1,103 +1,153 @@
-/* Reset e Base */
+/* Base reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Segoe UI', sans-serif;
 }
+
 body {
-  background: linear-gradient(145deg, #0b0f1e, #141a2f);
-  color: #fff;
+  background: linear-gradient(145deg, #000000, #0a0a0f, #1a1a1a);
+  color: #e0e0ff;
   min-height: 100vh;
-  padding: 20px;
   overflow-x: hidden;
 }
 
-/* Navegação */
-.nav-bar {
+/* Navbar */
+.navbar {
   display: flex;
-  gap: 20px;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 12px 20px;
-  border-radius: 12px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 0 10px #00b3ff55;
-}
-.tab-link {
-  text-decoration: none;
-  color: #ffffffcc;
-  font-weight: bold;
-  transition: 0.3s ease;
-}
-.tab-link:hover {
-  color: #00cfff;
-  text-shadow: 0 0 10px #00f7ff;
+  justify-content: space-around;
+  background: rgba(0, 0, 20, 0.4);
+  backdrop-filter: blur(10px);
+  padding: 10px;
+  border-bottom: 2px solid #0ff;
 }
 
-/* Container principal */
-.container {
-  max-width: 480px;
-  margin: 80px auto;
-  padding: 30px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 0 20px #00b3ff88;
-  text-align: center;
-}
-
-/* Título neon */
-.glow-text {
-  font-size: 32px;
-  font-weight: bold;
-  color: #e0f0ff;
-  text-shadow: 0 0 8px #00b3ff, 0 0 15px #0066ff;
-  margin-bottom: 15px;
-}
-.description {
+.tab-btn {
   color: #ccc;
-  margin-bottom: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 10px 15px;
+  border-radius: 10px;
+  transition: all 0.3s;
+}
+.tab-btn:hover,
+.tab-btn.active {
+  background: linear-gradient(90deg, #00f2ff, #4b00ff);
+  color: white;
+  box-shadow: 0 0 10px #00f2ff;
 }
 
-/* Inputs */
+/* Tela de Carregamento */
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000dd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeOut 1s ease forwards;
+  animation-delay: 3s;
+}
+
+.loader-box {
+  background: rgba(10,10,20,0.6);
+  border: 2px solid #00f2ff;
+  box-shadow: 0 0 20px #00f2ff;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  color: white;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #222;
+  margin-top: 20px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #00f2ff, #4b00ff);
+  animation: fillProgress 2.5s ease forwards;
+}
+
+@keyframes fillProgress {
+  to { width: 100%; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+/* Container */
+.container {
+  padding: 20px;
+}
+
+/* Abas */
+.tab-section {
+  display: none;
+  animation: fadeIn 0.4s ease;
+  margin-top: 20px;
+  background: rgba(10, 10, 20, 0.5);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  border: 1px solid #2f2f4f;
+  box-shadow: inset 0 0 20px #000000cc, 0 0 20px #00f2ff44;
+}
+.tab-section.active {
+  display: block;
+}
+
 input[type="text"] {
   width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 10px;
-  background: rgba(20, 30, 50, 0.8);
+  padding: 12px;
+  margin-top: 10px;
+  background: #1c1c2e;
   color: #fff;
+  border: 1px solid #00f2ff;
+  border-radius: 10px;
+  box-shadow: inset 0 0 10px #00000099;
   outline: none;
-  font-size: 16px;
-  margin-bottom: 20px;
-  box-shadow: inset 0 0 6px #00b3ff66;
-}
-input:focus {
-  box-shadow: 0 0 12px #00cfff99;
 }
 
-/* Botões */
 button {
-  padding: 12px 24px;
-  background: linear-gradient(to right, #0055ff, #00d4ff);
-  color: #fff;
+  margin-top: 10px;
+  padding: 12px 20px;
+  background: linear-gradient(90deg, #00f2ff, #4b00ff);
   border: none;
-  border-radius: 8px;
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 0 15px #00f2ff88;
   cursor: pointer;
-  box-shadow: 0 0 10px #00b3ff88;
-  font-weight: bold;
   transition: 0.3s ease;
 }
 button:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 15px #00e1ffcc;
 }
 
-/* Animações */
-.fade-in {
-  animation: fadeIn 1.2s ease-in-out;
+/* Logs */
+.log-box {
+  background: #111;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #444;
+  min-height: 100px;
+  overflow-y: auto;
 }
+
+/* Fade anim */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {opacity: 0;}
+  to {opacity: 1;}
 }
