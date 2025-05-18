@@ -1,9 +1,10 @@
-<!-- index.html --><!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DK Painel XSS</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
 </head>
 <body>
   <div id="loading-screen">
@@ -14,10 +15,10 @@
       </div>
     </div>
   </div>  <nav class="navbar">
-    <a href="#principal" class="tablink active" onclick="openTab(event, 'principal')">Principal</a>
-    <a href="#webhook" class="tablink" onclick="openTab(event, 'webhook')">Webhook</a>
-    <a href="#logs" class="tablink" onclick="openTab(event, 'logs')">Logs</a>
-    <a href="#config" class="tablink" onclick="openTab(event, 'config')">Configuração</a>
+    <a href="#principal" class="tablink">Principal</a>
+    <a href="#webhook" class="tablink">Webhook</a>
+    <a href="#logs" class="tablink">Logs</a>
+    <a href="#config" class="tablink">Configuração</a>
   </nav>  <main id="main-content">
     <section id="principal" class="tab-content active">
       <h2>Principal</h2>
@@ -25,8 +26,8 @@
     </section><section id="webhook" class="tab-content">
   <h2>Definir Webhook</h2>
   <input type="text" id="webhookInput" placeholder="Cole seu webhook aqui...">
-  <button onclick="saveWebhook()">Salvar Webhook</button>
-  <button onclick="testWebhook()">Testar Envio</button>
+  <button onclick="saveWebhook()">Salvar</button>
+  <button onclick="testWebhook()">Testar</button>
 </section>
 
 <section id="logs" class="tab-content">
@@ -36,55 +37,12 @@
 
 <section id="config" class="tab-content">
   <h2>Configurações</h2>
-  <h3>Tema</h3>
-  <label><input type="checkbox" id="toggleSound"> Ativar som</label>
-  <label><input type="checkbox" id="toggleAnimation"> Ativar animações</label>
+  <h3>Preferências de Interface</h3>
+  <label class="toggle">Modo Escuro <input type="checkbox" onchange="toggleDarkMode()"></label>
   <h3>Notificações</h3>
-  <label><input type="checkbox" id="toggleNotify"> Mostrar notificações</label>
+  <label class="toggle">Ativar alertas <input type="checkbox" onchange="toggleAlerts()"></label>
 </section>
 
-  </main>  <script>
-    let currentWebhook = '';
-
-    function openTab(evt, tabId) {
-      document.querySelectorAll('.tablink').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      evt.currentTarget.classList.add('active');
-      addLog(`Aba "${tabId}" aberta.`);
-    }
-
-    function saveWebhook() {
-      const input = document.getElementById('webhookInput').value;
-      currentWebhook = input;
-      addLog('Webhook salvo.');
-    }
-
-    function testWebhook() {
-      if (!currentWebhook) return alert('Webhook não definido.');
-      fetch(currentWebhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          embeds: [{
-            title: "Teste Webhook",
-            description: "Mensagem de teste enviada com sucesso.",
-            color: 16711680
-          }]
-        })
-      })
-      .then(() => addLog('Webhook testado com sucesso.'))
-      .catch(() => addLog('Erro ao testar webhook.'));
-    }
-
-    function addLog(message) {
-      const container = document.getElementById('logContainer');
-      const time = new Date().toLocaleTimeString();
-      container.innerHTML = `[${time}] ${message}<br>` + container.innerHTML;
-    }
-
-    window.onload = () => {
-      setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 2000);
-    }
-  </script></body>
+  </main>
+</body>
 </html>
