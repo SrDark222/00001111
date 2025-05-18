@@ -1,32 +1,44 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>XSS Panel do DK</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XSS Logger Neon</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
 </head>
-<body>
-  <div class="container">
-    <h1 class="titulo">Painel XSS - DKZIN</h1>
+<body oncontextmenu="return false">
+  <header>
+    <h1>XSS Logger</h1>
+    <nav class="tabs">
+      <button class="tab-button active" data-tab="webhook">Webhook</button>
+      <button class="tab-button" data-tab="site">Alvo XSS</button>
+      <button class="tab-button" data-tab="logs">Logs</button>
+    </nav>
+  </header>
 
-    <section class="card">
-      <h2>Salvar Webhook</h2>
-      <input id="webhookInput" type="text" placeholder="Cole seu webhook aqui">
+  <main>
+    <section id="webhook" class="tab-content active">
+      <h2>Webhook</h2>
+      <input type="text" id="webhookInput" placeholder="Cole seu Webhook do Discord">
       <button onclick="saveWebhook()">Salvar Webhook</button>
     </section>
 
-    <section class="card">
-      <h2>Salvar Link do Site</h2>
-      <input id="siteInput" type="text" placeholder="Cole o link do site alvo aqui">
-      <button onclick="saveSite()">Salvar Site</button>
+    <section id="site" class="tab-content">
+      <h2>Link do Site-Alvo</h2>
+      <input type="text" id="siteInput" placeholder="https://exemplo.com">
+      <button onclick="gerarScript()">Gerar Código XSS</button>
+      <pre id="xssCode"></pre>
     </section>
 
-    <section class="card">
-      <h2>Executar XSS</h2>
-      <button id="xssBtn">Injetar XSS</button>
+    <section id="logs" class="tab-content">
+      <h2>Logs Recebidos</h2>
+      <div id="logOutput"></div>
     </section>
-  </div>
+  </main>
 
-  <script src="main.js"></script>
+  <footer>
+    <small>&copy; XSS Logger by DK</small>
+  </footer>
 </body>
 </html>
