@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Painel Logs XSS - DKzin</title>
+<style>
+  /* Reset */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  body {
+    background: linear-gradient(135deg, #1a1a1a, #2b2b2b);
+    color: #eee;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    user-select: none;
+  }
+  header {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #e63946;
+    margin-bottom: 25px;
+    text-shadow: 0 0 10px #e63946aa;
+  }
+  nav {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  nav button {
+    background: #222;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1rem;
+    color: #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 8px transparent;
+  }
+  nav button:hover {
+    background: #e63946;
+    color: #fff;
+    box-shadow: 0 0 12px #e63946;
+  }
+  nav button.active {
+    background: #e63946;
+    color: #fff;
+    box-shadow: 0 0 12px #e63946;
+  }
+  main {
+    background: #1e1e1e;
+    width: 100%;
+    max-width: 720px;
+    border-radius: 14px;
+    box-shadow: 0 0 25px #e6394688;
+    padding: 25px;
+  }
+  section.tab-content {
+    display: none;
+    animation: fadeIn 0.5s ease forwards;
+  }
+  section.tab-content.active {
+    display: block;
+  }
+  h2 {
+    margin-bottom: 20px;
+    font-weight: 700;
+    color: #f1faee;
+    text-shadow: 0 0 6px #e63946aa;
+  }
+  textarea#logBox {
+    width: 100%;
+    height: 240px;
+    background: #2a2a2a;
+    border-radius: 12px;
+    border: none;
+    color: #eee;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    padding: 15px;
+    resize: vertical;
+    box-shadow: inset 0 0 10px #000000bb;
+  }
+  input#webhookInput {
+    width: 100%;
+    padding: 14px 15px;
+    border-radius: 12px;
+    border: none;
+    background: #2a2a2a;
+    color: #eee;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    box-shadow: inset 0 0 10px #000000bb;
+  }
+  button.action-btn {
+    background: #e63946;
+    border: none;
+    padding: 12px 24px;
+    margin: 8px 10px 10px 0;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 0 10px #e63946aa;
+    transition: background-color 0.3s ease;
+  }
+  button.action-btn:hover {
+    background: #d62828;
+    box-shadow: 0 0 15px #d62828cc;
+  }
+  section p {
+    line-height: 1.6;
+    color: #ccc;
+    font-size: 1rem;
+  }
+  /* Animação simples */
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+  /* Responsividade */
+  @media (max-width: 480px) {
+    nav {
+      flex-direction: column;
+    }
+    nav button {
+      width: 100%;
+    }
+    main {
+      padding: 15px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>Painel de Logs XSS - DKzin</header>
+
+<nav role="tablist" aria-label="Navegação principal">
+  <button id="logTabBtn" role="tab" aria-controls="logTab" aria-selected="true" class="active" onclick="switchTab('logTab')">Logs</button>
+  <button id="webhookTabBtn" role="tab" aria-controls="webhookTab" aria-selected="false" onclick="switchTab('webhookTab')">Webhook</button>
+  <button id="aboutTabBtn" role="tab" aria-controls="aboutTab" aria-selected="false" onclick="switchTab('aboutTab')">Sobre</button>
+</nav>
+
+<main>
+  <section id="logTab" class="tab-content active" role="tabpanel" aria-labelledby="logTabBtn">
+    <h2>Logs Capturados</h2>
+    <textarea id="logBox" placeholder="Cole aqui os logs capturados..."></textarea>
+    <div>
+      <button class="action-btn" onclick="copyTokens()">Copiar Tokens</button>
+      <button class="action-btn" onclick="copyNames()">Copiar Nomes</button>
+      <button class="action-btn" onclick="copyIDs()">Copiar IDs</button>
+    </div>
+  </section>
+
+  <section id="webhookTab" class="tab-content" role="tabpanel" aria-labelledby="webhookTabBtn">
+    <h2>Configurar Webhook</h2>
+    <input type="text" id="webhookInput" placeholder="Cole o URL do webhook aqui..." aria-label="Input do webhook" />
+    <button class="action-btn" onclick="saveWebhook()">Salvar Webhook</button>
+  </section>
+
+  <section id="aboutTab" class="tab-content" role="tabpanel" aria-labelledby="aboutTabBtn">
+    <h2>Sobre o Painel</h2>
+    <p>Esse painel foi feito para monitorar e organizar os logs capturados de ataques XSS, com funções de copiar dados importantes e configurar envio via webhook.</p>
+    <p>Desenvolvido por DKzin, interface estilizada pelo Menor DK.</p>
+    <p>Use com responsabilidade.</p>
+  </section>
+</main>
+
+<script>
+  // Troca abas
+  function switchTab(tabId) {
+    const tabs = document.querySelectorAll('.tab-content');
+    const buttons = document.querySelectorAll('nav button');
+
+    tabs.forEach(tab => {
+      if(tab.id === tabId) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+
+    buttons.forEach(btn => {
+      if(btn.getAttribute('aria-controls') === tabId) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+      } else {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      }
+    });
+  }
+
+  // Copiar texto para área de transferência com alertas
+  function copyToClipboard(text) {
+    if (!text || text.trim() === '') {
+      alert('Nada encontrado para copiar.');
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Copiado para a área de transferência!');
+    }).catch(() => {
+      alert('Falha ao copiar para a área de transferência.');
+    });
+  }
+
+  // Extrair tokens do textarea (exemplo: token: qualquercoisa)
+  function copyTokens() {
+    const logs = document.getElementById('logBox').value;
+    const tokens = [...logs.matchAll(/token:\s*([^\s]+)/gi)].map(m => m[1]).join('\n');
+    copyToClipboard(tokens);
+  }
+
+  // Extrair nomes (exemplo: name: qualquercoisa)
+  function copyNames() {
+    const logs = document.getElementById('logBox').value;
+    const names = [...logs.matchAll(/name:\s*([^\s]+)/gi)].map(m => m[1]).join('\n');
+    copyToClipboard(names);
+  }
+
+  // Extrair IDs (exemplo: id: 123456789)
+  function copyIDs() {
+    const logs = document.getElementById('logBox').value;
+    const ids = [...logs.matchAll(/id:\s*(\d+)/gi)].map(m => m[1]).join('\n');
+    copyToClipboard(ids);
+  }
+
+  // Salvar webhook no localStorage
+  function saveWebhook() {
+    const webhookInput = document.getElementById('webhookInput');
+    const url = webhookInput.value.trim();
+    if (!url) {
+      alert('Por favor, insira um URL válido do webhook.');
+      return;
+    }
+    try {
+      new URL(url);
+    } catch {
+      alert('URL inválido.');
+      return;
+    }
+    localStorage.setItem('customWebhook', url);
+    alert('Webhook salvo com sucesso!');
+  }
+
+  // Carregar webhook salvo
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('customWebhook');
+    if (saved) {
+      document.getElementById('webhookInput').value = saved;
+    }
+  });
+</script>
+
+</body>
+</html>
