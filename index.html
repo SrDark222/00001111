@@ -1,51 +1,49 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!DOCTYPE html><html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>XSS Logger Pro</title>
   <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
 </head>
 <body oncontextmenu="return false">
-  <header>
-    <h1>XSS Logger Pro</h1>
-    <nav class="tabs">
-      <button class="tab-btn active" data-tab="principal">Principal</button>
-      <button class="tab-btn" data-tab="webhook">Webhook Definido</button>
-      <button class="tab-btn" data-tab="logs">Logs</button>
-      <button class="tab-btn" data-tab="config">Configuração</button>
-    </nav>
-  </header>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">XSS Logger Pro</h1>
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="principal">Principal</button>
+        <button class="tab-btn" data-tab="webhook">Webhook</button>
+        <button class="tab-btn" data-tab="logs">Logs</button>
+        <button class="tab-btn" data-tab="config">Configuração</button>
+      </nav>
+    </header><main class="content">
+  <section id="principal" class="tab-page active">
+    <h2>Início</h2>
+    <p>Configure seu logger XSS com abas organizadas e visuais neon responsivos.</p>
+  </section>
 
-  <main>
-    <section id="principal" class="tab-page active">
-      <h2>Início</h2>
-      <p>Este painel permite configurar seu logger XSS personalizado.</p>
-      <p>Utilize as abas acima para definir webhook, site alvo e visualizar logs recebidos.</p>
-    </section>
+  <section id="webhook" class="tab-page">
+    <h2>Webhook</h2>
+    <input type="text" id="webhookInput" placeholder="Cole seu Webhook" class="input-box" />
+    <button class="action-btn" onclick="saveWebhook()">Salvar</button>
+    <p id="webhookStatus"></p>
+  </section>
 
-    <section id="webhook" class="tab-page">
-      <h2>Webhook Definido</h2>
-      <input type="text" id="webhookInput" placeholder="Cole seu Webhook" />
-      <button onclick="saveWebhook()">Salvar</button>
-      <p id="webhookStatus"></p>
-    </section>
+  <section id="logs" class="tab-page">
+    <h2>Logs Recebidos</h2>
+    <div id="logContainer" class="log-area">
+      <p>Nenhum log ainda...</p>
+    </div>
+  </section>
 
-    <section id="logs" class="tab-page">
-      <h2>Logs Recebidos</h2>
-      <div id="logContainer">
-        <p>Nenhum log ainda...</p>
-      </div>
-    </section>
+  <section id="config" class="tab-page">
+    <h2>Configuração de Site</h2>
+    <input type="text" id="targetInput" placeholder="https://site-alvo.com" class="input-box" />
+    <button class="action-btn" onclick="saveTarget()">Salvar Link</button>
+    <p id="targetStatus"></p>
+  </section>
+</main>
 
-    <section id="config" class="tab-page">
-      <h2>Configuração de Site Alvo</h2>
-      <input type="text" id="targetInput" placeholder="https://site-alvo.com" />
-      <button onclick="saveTarget()">Salvar Link</button>
-      <p id="targetStatus"></p>
-    </section>
-  </main>
-
-  <script src="script.js"></script>
+  </div>
 </body>
 </html>
