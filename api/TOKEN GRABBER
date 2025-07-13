@@ -39,13 +39,13 @@ end
 -- ABA: KILL
 ---------------------------------------
 local killTab = Window:MakeTab({"kill", "bomb"})
-killTab:AddSection("🎯 SELEÇÃO DE ALVO")
+killTab:AddSection("SELEÇÃO DE ALVO")
 
 killTab:AddTextBox({Name = "ALVO NICK", PlaceholderText = "ex: menorzin", Callback = function(v) killTarget = v end})
 local killDropdown = killTab:AddDropdown({Name = "SELECIONAR JOGADOR", Options = {}, Callback = function(v) killTarget = v end})
 
 killTab:AddButton({
-	Name = "🔄 ATUALIZAR JOGADORES",
+	Name = "ATUALIZAR LISTA",
 	Callback = function()
 		local lista = {}
 		for _, p in pairs(Players:GetPlayers()) do
@@ -58,7 +58,7 @@ killTab:AddButton({
 })
 
 killTab:AddButton({
-	Name = "📍 TP PARA O ALVO",
+	Name = "TP PARA O ALVO",
 	Callback = function()
 		local p = Players:FindFirstChild(killTarget)
 		if p and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -68,16 +68,16 @@ killTab:AddButton({
 })
 
 killTab:AddToggle({
-	Name = "👁️ VISUALIZAR CAMERA DO ALVO",
+	Name = "VISUALIZAR CAMERA",
 	Default = false,
 	Callback = function(v) viewTarget = v end
 })
 
-killTab:AddSection("☠️ OPÇÕES DE ATAQUE")
+killTab:AddSection("OPÇÕES DE KILL)
 
-killTab:AddToggle({Name = "🔪 MATAR ALVO", Default = false, Callback = function(v) killLoop = v end})
-killTab:AddToggle({Name = "💀 MATAR TODOS", Default = false, Callback = function(v) killAll = v end})
-killTab:AddToggle({Name = "🎯 MATAR MAIS PRÓXIMO", Default = false, Callback = function(v) killNearest = v end})
+killTab:AddToggle({Name = "MATAR ALVO", Default = false, Callback = function(v) killLoop = v end})
+killTab:AddToggle({Name = "MATAR TODOS", Default = false, Callback = function(v) killAll = v end})
+killTab:AddToggle({Name = "MATAR MAIS PRÓXIMO", Default = false, Callback = function(v) killNearest = v end})
 
 RunService.RenderStepped:Connect(function()
 	if viewTarget and killTarget ~= "" then
