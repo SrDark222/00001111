@@ -45,7 +45,7 @@ killTab:AddTextBox({Name = "ALVO NICK", PlaceholderText = "ex: menorzin", Callba
 local killDropdown = killTab:AddDropdown({Name = "SELECIONAR JOGADOR", Options = {}, Callback = function(v) killTarget = v end})
 
 killTab:AddButton({
-	Name = "ATUALIZAR LISTA",
+	Name = "ATUALIZAR JOGADORES",
 	Callback = function()
 		local lista = {}
 		for _, p in pairs(Players:GetPlayers()) do
@@ -68,12 +68,12 @@ killTab:AddButton({
 })
 
 killTab:AddToggle({
-	Name = "VISUALIZAR CAMERA",
+	Name = "VVISUALIZAR CAMERA DO ALVO",
 	Default = false,
 	Callback = function(v) viewTarget = v end
 })
 
-killTab:AddSection("OPÇÕES DE KILL)
+killTab:AddSection("☠OPÇÕES DE ATAQUE")
 
 killTab:AddToggle({Name = "MATAR ALVO", Default = false, Callback = function(v) killLoop = v end})
 killTab:AddToggle({Name = "MATAR TODOS", Default = false, Callback = function(v) killAll = v end})
@@ -117,130 +117,107 @@ task.spawn(function()
 end)
 
 ---------------------------------------
--- ABA: ESP (MELHORADA)
+-- ABA: ESP
 ---------------------------------------
 local espTab = Window:MakeTab({"esp", "eye"})
-espTab:AddSection("VISUAL COMPLETO DOS JOGADORES")
+espTab:AddSection("ESP DE JOGADORES")
 
 local espName, espTool, espHP, espSong = false, false, false, false
 local MarketplaceService = game:GetService("MarketplaceService")
 
-espTab:AddToggle({ Name = "Mostrar Nome", Default = false, Callback = function(v) espName = v end })
-espTab:AddToggle({ Name = "Mostrar Item Equipado", Default = false, Callback = function(v) espTool = v end })
-espTab:AddToggle({ Name = "Mostrar Vida (%)", Default = false, Callback = function(v) espHP = v end })
-espTab:AddToggle({ Name = "Mostrar Música/Som", Default = false, Callback = function(v) espSong = v end })
+espTab:AddToggle({ Name = "Nome do Jogador", Default = false, Callback = function(v) espName = v end })
+espTab:AddToggle({ Name = "Item Equipado", Default = false, Callback = function(v) espTool = v end })
+espTab:AddToggle({ Name = "Vida (%)", Default = false, Callback = function(v) espHP = v end })
+espTab:AddToggle({ Name = "Som/Música", Default = false, Callback = function(v) espSong = v end })
 
 local function criarLinha(gui, texto, cor, pos)
-	local label = Instance.new("TextLabel")
+	local label = Instance.new("TextLabel", gui)
 	label.Name = "Linha_"..pos
-	label.Size = UDim2.new(1, 0, 0, 18)
-	label.Position = UDim2.new(0, 0, 0, (pos - 1) * 18)
+	label.Size = UDim2.new(1, 0, 0, 20)
+	label.Position = UDim2.new(0, 0, 0, (pos - 1) * 20)
 	label.BackgroundTransparency = 1
 	label.Text = texto
 	label.TextColor3 = cor
-	label.Font = Enum.Font.Gotham
-	label.TextStrokeTransparency = 0.15
+	label.TextStrokeTransparency = 0.2
 	label.TextScaled = true
-	label.ZIndex = 2
-	label.Parent = gui
+	label.Font = Enum.Font.GothamSemibold
 end
 
-local function criarGUI(char)
-	local gui = Instance.new("BillboardGui")
-	gui.Name = "ESP_INFO"
-	gui.Adornee = char:FindFirstChild("Head")
-	gui.Size = UDim2.new(0, 220, 0, 100)
-	gui.StudsOffset = Vector3.new(0, 3, 0)
-	gui.AlwaysOnTop = true
-	gui.MaxDistance = 300
-	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	gui.Parent = char
-	return gui
-end
+local function criarESP(player)
+	local head = player.Character and player.Character:FindFirstChild("Head")
+	if not head then return end
 
-local soundCache = {}
-
-local function atualizarESP(player)
-	if not player.Character or not player.Character:FindFirstChild("Head") then return end
-	local char = player.Character
-	local gui = char:FindFirstChild("ESP_INFO")
-	if not gui then gui = criarGUI(char) end
+	local gui = player.Character:FindFirstChild("ESP_INFO")
+	if not gui then
+		gui = Instance.new("BillboardGui")
+		gui.Name = "ESP_INFO"
+		gui.Parent = player.Character
+		gui.Adornee = head
+		gui.Size = UDim2.new(0, 200, 0, 100)
+		gui.StudsOffset = Vector3.new(0, 3, 0)
+		gui.AlwaysOnTop = true
+		gui.MaxDistance = 300
+	end
 	gui:ClearAllChildren()
 
 	local pos = 1
 	if espName then
-		criarLinha(gui, "[NOME]  "..player.Name, Color3.new(1, 1, 1), pos)
+		criarLinha(gui, player.Name, Color3.fromRGB(255, 255, 255), pos)
 		pos += 1
 	end
 	if espTool then
-		local tool = char:FindFirstChildOfClass("Tool")
-		criarLinha(gui, "[ITEM]  "..(tool and tool.Name or "Nenhum"), Color3.fromRGB(255, 240, 180), pos)
+		local tool = player.Character:FindFirstChildOfClass("Tool")
+		local nome = tool and tool.Name or "Sem item"
+		criarLinha(gui, nome, Color3.fromRGB(255, 210, 50), pos)
 		pos += 1
 	end
 	if espHP then
-		local hum = char:FindFirstChildOfClass("Humanoid")
+		local hum = player.Character:FindFirstChildOfClass("Humanoid")
 		if hum then
-			local percent = math.floor((hum.Health / hum.MaxHealth) * 100)
-			criarLinha(gui, "[VIDA]  "..percent.."%", Color3.fromRGB(255, 130, 130), pos)
+			local hp = math.floor((hum.Health / hum.MaxHealth) * 100)
+			criarLinha(gui, "Vida: "..hp.."%", Color3.fromRGB(255, 100, 100), pos)
 			pos += 1
 		end
 	end
 	if espSong then
-		local currentID = ""
-		local currentName = ""
-		for _, obj in ipairs(char:GetDescendants()) do
+		for _, obj in ipairs(player.Character:GetDescendants()) do
 			if obj:IsA("Sound") and obj.IsPlaying and obj.SoundId:match("%d") then
 				local id = obj.SoundId:match("%d+")
-				if id then
-					currentID = id
-					currentName = "Desconhecido"
-					if soundCache[id] then
-						currentName = soundCache[id]
-					else
-						pcall(function()
-							local info = MarketplaceService:GetProductInfo(tonumber(id))
-							soundCache[id] = info.Name
-							currentName = info.Name
-						end)
-					end
-					break
-				end
-			end
-		end
-		if currentID ~= "" then
-			criarLinha(gui, "[MÚSICA]  "..currentName, Color3.fromRGB(180, 220, 255), pos)
-			pos += 1
-			criarLinha(gui, "[ID]  "..currentID, Color3.fromRGB(210, 210, 210), pos)
-			pos += 1
+				local nome = "Desconhecido"
+				pcall(function()
+					local info = MarketplaceService:GetProductInfo(tonumber(id))
+					nome = info.Name
+				end)
+				criarLinha(gui, "🎵 "..nome, Color3.fromRGB(100, 200, 255), pos)
+				pos += 1
+				criarLinha(gui, "ID: "..id, Color3.fromRGB(200, 200, 200), pos)
+				pos += 1
 
-			if not char:FindFirstChild("SOM_HL") then
 				local hl = Instance.new("Highlight")
-				hl.Name = "SOM_HL"
-				hl.Parent = char
+				hl.Name = "HighlightSom"
+				hl.Parent = obj
 				hl.FillTransparency = 1
+				hl.OutlineColor = Color3.fromRGB(0, 255, 255)
 				hl.OutlineTransparency = 0
-				hl.OutlineColor = Color3.fromRGB(0, 180, 255)
-				game.Debris:AddItem(hl, 3)
+				game.Debris:AddItem(hl, 2)
+				break
 			end
 		end
 	end
 end
 
-game:GetService("RunService").RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function()
 	if not (espName or espTool or espHP or espSong) then
 		for _, p in pairs(Players:GetPlayers()) do
-			local char = p.Character
-			if char then
-				local gui = char:FindFirstChild("ESP_INFO")
+			if p.Character then
+				local gui = p.Character:FindFirstChild("ESP_INFO")
 				if gui then gui:Destroy() end
 			end
 		end
 	else
 		for _, p in pairs(Players:GetPlayers()) do
-			if p ~= LocalPlayer and p.Character then
-				pcall(function()
-					atualizarESP(p)
-				end)
+			if p ~= LocalPlayer then
+				pcall(function() criarESP(p) end)
 			end
 		end
 	end
