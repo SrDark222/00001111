@@ -13,14 +13,13 @@ Window:AddMinimizeButton({
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local MarketplaceService = game:GetService("MarketplaceService")
-local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
 
-local killTarget, killLoop, killAll, killNearest = "", false, false, false
-local viewTarget = false
-local espName, espTool, espHP, espSong = false, false, false, false
+local killTarget = ""
+local killLoop = false
+local killAll = false
+local killNearest = false
+local espActive = false
 
--- FUNÇÃO PRA ACHAR O MAIS PRÓXIMO
 local function getNearest()
 	local closest, dist = nil, math.huge
 	for _, p in pairs(Players:GetPlayers()) do
@@ -35,16 +34,13 @@ local function getNearest()
 	return closest
 end
 
----------------------------------------
--- ABA: KILL
----------------------------------------
-local killTab = Window:MakeTab({"kill", "bomb"})
-killTab:AddSection("SELEÇÃO DE ALVO")
+local mdimTab = Window:MakeTab({"menu", "mdim"})
+mdimTab:AddSection({"OPÇÕES - MDIM T.C.C"})
 
-killTab:AddTextBox({Name = "ALVO NICK", PlaceholderText = "ex: menorzin", Callback = function(v) killTarget = v end})
-local killDropdown = killTab:AddDropdown({Name = "SELECIONAR JOGADOR", Options = {}, Callback = function(v) killTarget = v end})
+mdimTab:AddTextBox({Name = "ALVO NICK", PlaceholderText = "ex: menorzin", Callback = function(v) killTarget = v end})
+local killDropdown = mdimTab:AddDropdown({Name = "SELECIONAR JOGADOR", Options = {}, Callback = function(v) killTarget = v end})
 
-killTab:AddButton({
+mdimTab:AddButton({
 	Name = "ATUALIZAR JOGADORES",
 	Callback = function()
 		local lista = {}
@@ -57,221 +53,143 @@ killTab:AddButton({
 	end
 })
 
-killTab:AddButton({
-	Name = "TP PARA O ALVO",
-	Callback = function()
-		local p = Players:FindFirstChild(killTarget)
-		if p and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-			LocalPlayer.Character:MoveTo(p.Character.HumanoidRootPart.Position + Vector3.new(0,2,0))
-		end
-	end
-})
-
-killTab:AddToggle({
-	Name = "VVISUALIZAR CAMERA DO ALVO",
+mdimTab:AddToggle({
+	Name = "MATAR ALVO",
 	Default = false,
-	Callback = function(v) viewTarget = v end
+	Callback = function(v)
+		killLoop = v
+	end
 })
 
-killTab:AddSection("☠OPÇÕES DE ATAQUE")
-
-killTab:AddToggle({Name = "MATAR ALVO", Default = false, Callback = function(v) killLoop = v end})
-killTab:AddToggle({Name = "MATAR TODOS", Default = false, Callback = function(v) killAll = v end})
-killTab:AddToggle({Name = "MATAR MAIS PRÓXIMO", Default = false, Callback = function(v) killNearest = v end})
-
-RunService.RenderStepped:Connect(function()
-	if viewTarget and killTarget ~= "" then
-		local p = Players:FindFirstChild(killTarget)
-		if p and p.Character and p.Character:FindFirstChild("Head") then
-			Camera.CameraSubject = p.Character.Head
-		end
-	else
-		Camera.CameraSubject = LocalPlayer.Character:FindFirstChild("Humanoid")
+mdimTab:AddToggle({
+	Name = "MATAR TODOS",
+	Default = false,
+	Callback = function(v)
+		killAll = v
 	end
-end)
+})
+
+mdimTab:AddToggle({
+	Name = "MATAR O MAIS PRÓXIMO",
+	Default = false,
+	Callback = function(v)
+		killNearest = v
+	end
+})
 
 task.spawn(function()
 	while true do
-		task.wait(0.01)
+		task.wait(0.001)
 		if killLoop and killTarget ~= "" then
+			local args = {"Damage", killTarget}
 			pcall(function()
-				LocalPlayer.Backpack:WaitForChild("Soco"):WaitForChild("DMG"):FireServer("Damage", killTarget)
+				LocalPlayer.Backpack:WaitForChild("Soco"):WaitForChild("DMG"):FireServer(unpack(args))
 			end)
 		elseif killAll then
 			for _, p in pairs(Players:GetPlayers()) do
 				if p ~= LocalPlayer then
+					local args = {"Damage", p.Name}
 					pcall(function()
-						LocalPlayer.Backpack:WaitForChild("Soco"):WaitForChild("DMG"):FireServer("Damage", p.Name)
+						LocalPlayer.Backpack:WaitForChild("Soco"):WaitForChild("DMG"):FireServer(unpack(args))
 					end)
 				end
 			end
 		elseif killNearest then
 			local alvo = getNearest()
 			if alvo then
+				local args = {"Damage", alvo.Name}
 				pcall(function()
-					LocalPlayer.Backpack:WaitForChild("Soco"):WaitForChild("DMG"):FireServer("Damage", alvo.Name)
+					LocalPlayer.Backpack:WaitForChild("Soco"):WaitForChild("DMG"):FireServer(unpack(args))
 				end)
 			end
 		end
 	end
 end)
 
----------------------------------------
--- ABA: ESP
----------------------------------------
-local espTab = Window:MakeTab({"esp", "eye"})
-espTab:AddSection("ESP DE JOGADORES")
-
-local espName, espTool, espHP, espSong = false, false, false, false
-local MarketplaceService = game:GetService("MarketplaceService")
-
-espTab:AddToggle({ Name = "Nome do Jogador", Default = false, Callback = function(v) espName = v end })
-espTab:AddToggle({ Name = "Item Equipado", Default = false, Callback = function(v) espTool = v end })
-espTab:AddToggle({ Name = "Vida (%)", Default = false, Callback = function(v) espHP = v end })
-espTab:AddToggle({ Name = "Som/Música", Default = false, Callback = function(v) espSong = v end })
-
-local function criarLinha(gui, texto, cor, pos)
-	local label = Instance.new("TextLabel", gui)
-	label.Name = "Linha_"..pos
-	label.Size = UDim2.new(1, 0, 0, 20)
-	label.Position = UDim2.new(0, 0, 0, (pos - 1) * 20)
-	label.BackgroundTransparency = 1
-	label.Text = texto
-	label.TextColor3 = cor
-	label.TextStrokeTransparency = 0.2
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamSemibold
-end
-
-local function criarESP(player)
-	local head = player.Character and player.Character:FindFirstChild("Head")
-	if not head then return end
-
-	local gui = player.Character:FindFirstChild("ESP_INFO")
-	if not gui then
-		gui = Instance.new("BillboardGui")
-		gui.Name = "ESP_INFO"
-		gui.Parent = player.Character
-		gui.Adornee = head
-		gui.Size = UDim2.new(0, 200, 0, 100)
-		gui.StudsOffset = Vector3.new(0, 3, 0)
-		gui.AlwaysOnTop = true
-		gui.MaxDistance = 300
-	end
-	gui:ClearAllChildren()
-
-	local pos = 1
-	if espName then
-		criarLinha(gui, player.Name, Color3.fromRGB(255, 255, 255), pos)
-		pos += 1
-	end
-	if espTool then
-		local tool = player.Character:FindFirstChildOfClass("Tool")
-		local nome = tool and tool.Name or "Sem item"
-		criarLinha(gui, nome, Color3.fromRGB(255, 210, 50), pos)
-		pos += 1
-	end
-	if espHP then
-		local hum = player.Character:FindFirstChildOfClass("Humanoid")
-		if hum then
-			local hp = math.floor((hum.Health / hum.MaxHealth) * 100)
-			criarLinha(gui, "Vida: "..hp.."%", Color3.fromRGB(255, 100, 100), pos)
-			pos += 1
-		end
-	end
-	if espSong then
-		for _, obj in ipairs(player.Character:GetDescendants()) do
-			if obj:IsA("Sound") and obj.IsPlaying and obj.SoundId:match("%d") then
-				local id = obj.SoundId:match("%d+")
-				local nome = "Desconhecido"
-				pcall(function()
-					local info = MarketplaceService:GetProductInfo(tonumber(id))
-					nome = info.Name
-				end)
-				criarLinha(gui, "🎵 "..nome, Color3.fromRGB(100, 200, 255), pos)
-				pos += 1
-				criarLinha(gui, "ID: "..id, Color3.fromRGB(200, 200, 200), pos)
-				pos += 1
-
-				local hl = Instance.new("Highlight")
-				hl.Name = "HighlightSom"
-				hl.Parent = obj
-				hl.FillTransparency = 1
-				hl.OutlineColor = Color3.fromRGB(0, 255, 255)
-				hl.OutlineTransparency = 0
-				game.Debris:AddItem(hl, 2)
-				break
-			end
-		end
-	end
-end
-
-RunService.RenderStepped:Connect(function()
-	if not (espName or espTool or espHP or espSong) then
-		for _, p in pairs(Players:GetPlayers()) do
-			if p.Character then
-				local gui = p.Character:FindFirstChild("ESP_INFO")
-				if gui then gui:Destroy() end
-			end
-		end
-	else
-		for _, p in pairs(Players:GetPlayers()) do
-			if p ~= LocalPlayer then
-				pcall(function() criarESP(p) end)
-			end
-		end
-	end
-end)
----------------------------------------
--- ABA: TAG
----------------------------------------
-local tagTab = Window:MakeTab({"tags", "tag"})
-tagTab:AddSection(" TAG T.C.C")
-
-tagTab:AddToggle({
-	Name = "ATIVAR TAG",
-	Default = false,
-	Callback = function(v)
-		local texto = v and "TCC 🇪🇬" or ""
-		local tag = { Color3.new(1, 0, 0), 0, texto }
-		game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvent"):WaitForChild("Shop"):WaitForChild("Tag"):FireServer(unpack(tag))
-	end
-})
-
----------------------------------------
--- ABA: PARTICULAS
----------------------------------------
-local partTab = Window:MakeTab({"particulas", "sparkles"})
-partTab:AddSection("EFITOS VISUAIS")
-
-partTab:AddToggle({
-	Name = "PARTICULAS T.C.C",
+-- ESP de som com toggle
+mdimTab:AddToggle({
+	Name = " ESP DE SOM ATIVO",
 	Default = false,
 	Callback = function(state)
-		local remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvent"):WaitForChild("Shop"):WaitForChild("Effect")
-		if state then
-			for i=1,2 do
-				remote:FireServer("rbxassetid://100971981026789", 0)
-				wait(0.05)
-			end
-		else
-			for i=1,2 do
-				remote:FireServer("0", 0)
-				wait(0.05)
+		espActive = state
+		if not state then
+			for _, v in pairs(workspace:GetDescendants()) do
+				if v:IsA("BillboardGui") and v.Name == "RadioInfo" then
+					pcall(function() v:Destroy() end)
+				end
 			end
 		end
 	end
 })
 
----------------------------------------
--- ABA: INFO
----------------------------------------
-local infoTab = Window:MakeTab({"info", "info"})
-infoTab:AddSection("📜 T.C.C OFICIAL 🇪🇬")
-infoTab:AddDiscordInvite({
+-- ESP loop
+task.spawn(function()
+	while true do
+		task.wait(0.5)
+		if not espActive then continue end
+
+		local sonsDetectados = {}
+		for _, obj in pairs(workspace:GetDescendants()) do
+			if obj:IsA("Sound") and obj.IsPlaying then
+				local id = tostring(obj.SoundId):match("%d+")
+				local origem = obj.Parent:IsA("BasePart") and obj.Parent or obj:FindFirstAncestorWhichIsA("Model") and obj:FindFirstAncestorWhichIsA("Model"):FindFirstChild("Head")
+				if id and origem and not sonsDetectados[origem] then
+					local nome = "Desconhecido"
+					pcall(function()
+						local info = MarketplaceService:GetProductInfo(tonumber(id))
+						nome = info.Name
+					end)
+					local bb = origem:FindFirstChild("RadioInfo")
+					if bb then bb:Destroy() end
+					local gui = Instance.new("BillboardGui", origem)
+					gui.Name = "RadioInfo"
+					gui.Size = UDim2.new(0, 200, 0, 40)
+					gui.StudsOffset = Vector3.new(0, 3, 0)
+					gui.Adornee = origem
+					gui.AlwaysOnTop = true
+
+					local text = Instance.new("TextLabel", gui)
+					text.Size = UDim2.new(1, 0, 1, 0)
+					text.BackgroundTransparency = 1
+					text.TextColor3 = Color3.new(1, 1, 1)
+					text.TextStrokeTransparency = 0
+					text.TextScaled = true
+					text.Font = Enum.Font.SourceSansBold
+					text.Text = "🎵 "..nome.."\n🆔 "..id
+					sonsDetectados[origem] = true
+				end
+			end
+		end
+
+		for _, obj in pairs(workspace:GetDescendants()) do
+			if obj:IsA("BillboardGui") and obj.Name == "RadioInfo" and obj.Adornee and not sonsDetectados[obj.Adornee] then
+				obj:Destroy()
+			end
+		end
+	end
+end)
+
+-- Partículas novas + tag vermelha
+mdimTab:AddButton({
+	Name = " SETAR TAG T.C.C + PARTICULAS",
+	Callback = function()
+		local tag = { Color3.new(1, 0, 0), 1000, "TCC 🇪🇬" }
+		game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvent"):WaitForChild("Shop"):WaitForChild("Tag"):FireServer(unpack(tag))
+		for i = 1, 2 do
+			local effect = { "rbxassetid://100971981026789", 0 }
+			game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvent"):WaitForChild("Shop"):WaitForChild("Effect"):FireServer(unpack(effect))
+			task.wait(0.0001)
+		end
+	end
+})
+
+-- Info
+local InfoTab = Window:MakeTab({"info", "T.C.C"})
+InfoTab:AddSection("T.C.C OFICIAL 🇪🇬")
+InfoTab:AddDiscordInvite({
 	Name = "T.C.C Hub",
 	Description = "Cola no servidor pra updates, ajuda e novidades",
-	Logo = "rbxassetid://100971981026789",
+	Logo = "rbxassetid://18751483361",
 	Invite = "discord.gg/fjZRjEcpwV"
 })
-infoTab:AddParagraph({"CREDITOS", "- Dev: DKZIN\n- Hub MDIM Insano\n- T.C.C 🔱"})
+InfoTab:AddParagraph({"CREDITOS", "- Dev: DKZIN\n- Hub MDIM Insano\n- T.C.C 🔱"})
