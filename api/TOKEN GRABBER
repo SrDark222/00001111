@@ -285,7 +285,8 @@ infoTab:AddParagraph({
 
 infoTab:AddSection({"Atualizações da Versão"})
 infoTab:AddParagraph({
-    "- Versão MDIM 1.0.0"
+    "- Versão MDIM 1.0.0",
+    "",
     "- Kill Loop para alvo individual e todos",
     "- Tags personalizadas com cores variadas",
     "- Partículas T.C.C ativáveis na aba Kill",
