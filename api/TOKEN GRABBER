@@ -285,17 +285,5 @@ infoTab:AddParagraph({
 
 infoTab:AddSection({"Atualizações da Versão"})
 infoTab:AddParagraph({
-    "- Versão MDIM 1.0.0",
-    "",
-    "- Kill Loop para alvo individual e todos",
-    "- Tags personalizadas com cores variadas",
-    "- Partículas T.C.C ativáveis na aba Kill",
-    "- ESP de som com identificação dos sons ativos",
-    "- ESP de Nicks e Vida com toggles separados",
-    "- UI responsiva e moderna com RedzLib",
-    "",
-    "- Correções gerais e melhorias de desempenho",
-    "",
-    "Obrigado por usar o T.C.C H4x - MDIM!",
-    "Fique ligado para próximas atualizações."
+    Versão MDIM 1.0.0\n[=) Kill Loop para alvo individual e todos\n[+] Tags personalizadas com cores variadas\n[=] Partículas T.C.C ativáveis na aba Kill\n[=] ESP de som com identificação dos sons ativos\n[+] ESP de Nicks e Vida separados\n[+] Correções gerais e melhorias de desempenho\nObrigado por usar o T.C.C H4x - MDIM!\nFique ligado para próximas atualizações.
 })
