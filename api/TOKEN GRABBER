@@ -8,18 +8,19 @@ local Window = redzlib:MakeWindow({
 
 Window:AddMinimizeButton({
     Button = { Image = "rbxassetid://10704761835", BackgroundTransparency = 0 },
-    Corner = { CornerRadius = UDim.new(0.4, 1) },
+    Corner = { CornerRadius = UDim.new(0.4, 1) }
 })
 
+-- Serviços
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MarketplaceService = game:GetService("MarketplaceService")
 
--- Vars
+-- Variáveis
 local killTarget, killLoop, killAll = "", false, false
 local customTagName, tagColor = "", Color3.fromRGB(255, 0, 0)
-local espSound, espName, espHealth = false, true, true
+local espSound, espShowName, espShowHealth = false, true, true
 local colors = {
     Vermelho = Color3.fromRGB(255,0,0),
     Verde = Color3.fromRGB(0,255,0),
@@ -31,21 +32,20 @@ local colors = {
     Preto = Color3.fromRGB(0,0,0)
 }
 
--- Atualiza lista de players no dropdown
+-- Função para atualizar lista de players no dropdown
 local function updatePlayerList(dropdown)
     local list = {}
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer then table.insert(list, p.Name) end
     end
-    for _, m in pairs({"Clear","Add","SetOptions","Update","Set","Refresh"}) do
-        pcall(function() if dropdown[m] then dropdown[m](dropdown, list) end end)
+    for _, method in pairs({"Clear", "Add", "SetOptions", "Update", "Set", "Refresh"}) do
+        pcall(function() if dropdown[method] then dropdown[method](dropdown, list) end end)
     end
 end
 
--- Função kill loop
+-- Loop kill automático
 task.spawn(function()
-    while true do
-        task.wait(0.1)
+    while task.wait(0.1) do
         if killLoop and killTarget ~= "" then
             pcall(function()
                 LocalPlayer.Backpack:WaitForChild("Soco"):WaitForChild("DMG"):FireServer("Damage", killTarget)
@@ -62,19 +62,25 @@ task.spawn(function()
     end
 end)
 
--- Aba Kill
-local killTab = Window:MakeTab({"kill","T.C.C Kill"})
+-- Aba Principal Kill
+local killTab = Window:MakeTab({"kill", "T.C.C Kill"})
 killTab:AddSection({"Ataque"})
 
 local killDropdown = killTab:AddDropdown({
     Name = "Selecionar Alvo",
     Options = {},
-    Callback = function(v) killTarget = v; killLoop = false; killAll = false end
+    Callback = function(value)
+        killTarget = value
+        killLoop = false
+        killAll = false
+    end
 })
 
 killTab:AddButton({
     Name = "Atualizar Lista",
-    Callback = function() updatePlayerList(killDropdown) end
+    Callback = function()
+        updatePlayerList(killDropdown)
+    end
 })
 
 killTab:AddToggle({
@@ -95,13 +101,15 @@ killTab:AddToggle({
     end
 })
 
--- Tags & Partículas
+-- Tags Personalizadas
 killTab:AddSection({"Tags Personalizadas"})
 
 killTab:AddTextBox({
     Name = "Texto da Tag",
     PlaceholderText = "Sua tag aqui",
-    Callback = function(v) customTagName = v end
+    Callback = function(value)
+        customTagName = value
+    end
 })
 
 killTab:AddDropdown({
@@ -111,7 +119,9 @@ killTab:AddDropdown({
         for k in pairs(colors) do table.insert(t, k) end
         return t
     end)(),
-    Callback = function(v) tagColor = colors[v] or Color3.fromRGB(255,0,0) end
+    Callback = function(value)
+        tagColor = colors[value] or Color3.fromRGB(255, 0, 0)
+    end
 })
 
 killTab:AddButton({
@@ -125,20 +135,23 @@ killTab:AddButton({
     end
 })
 
+-- Partículas T.C.C
 killTab:AddSection({"Partículas T.C.C"})
+
 killTab:AddButton({
     Name = "Ativar Partículas T.C.C",
     Callback = function()
         local effectId = "rbxassetid://100971981026789"
         pcall(function()
-            ReplicatedStorage:WaitForChild("RemoteEvent"):WaitForChild("Shop"):WaitForChild("Effect"):FireServer(effectId, 0)
-            ReplicatedStorage:WaitForChild("RemoteEvent"):WaitForChild("Shop"):WaitForChild("Effect"):FireServer(effectId, 0)
+            local remote = ReplicatedStorage:WaitForChild("RemoteEvent"):WaitForChild("Shop"):WaitForChild("Effect")
+            remote:FireServer(effectId, 0)
+            remote:FireServer(effectId, 0)
         end)
     end
 })
 
 -- Aba ESP
-local espTab = Window:MakeTab({"esp","T.C.C ESP"})
+local espTab = Window:MakeTab({"esp", "T.C.C ESP"})
 espTab:AddSection({"ESP de Som"})
 
 espTab:AddToggle({
@@ -148,7 +161,9 @@ espTab:AddToggle({
         espSound = state
         if not state then
             for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BillboardGui") and v.Name == "RadioInfo" then pcall(function() v:Destroy() end) end
+                if v:IsA("BillboardGui") and v.Name == "RadioInfo" then
+                    pcall(function() v:Destroy() end)
+                end
             end
         end
     end
@@ -157,40 +172,45 @@ espTab:AddToggle({
 task.spawn(function()
     while true do
         task.wait(0.5)
-        if not espSound then continue end
-        local sons = {}
-        for _, s in pairs(workspace:GetDescendants()) do
-            if s:IsA("Sound") and s.IsPlaying then
-                local id = tostring(s.SoundId):match("%d+")
-                local orig = s.Parent:IsA("BasePart") and s.Parent or s:FindFirstAncestorWhichIsA("Model") and s:FindFirstAncestorWhichIsA("Model"):FindFirstChild("Head")
-                if id and orig and not sons[orig] then
-                    local name = "Desconhecido"
-                    pcall(function()
-                        name = MarketplaceService:GetProductInfo(tonumber(id)).Name
-                    end)
-                    local old = orig:FindFirstChild("RadioInfo")
-                    if old then old:Destroy() end
-                    local gui = Instance.new("BillboardGui", orig)
-                    gui.Name = "RadioInfo"
-                    gui.Size = UDim2.new(0, 200, 0, 40)
-                    gui.StudsOffset = Vector3.new(0, 3, 0)
-                    gui.Adornee = orig
-                    gui.AlwaysOnTop = true
-                    local txt = Instance.new("TextLabel", gui)
-                    txt.Size = UDim2.new(1,0,1,0)
-                    txt.BackgroundTransparency = 1
-                    txt.TextColor3 = Color3.new(1,1,1)
-                    txt.TextStrokeTransparency = 0
-                    txt.TextScaled = true
-                    txt.Font = Enum.Font.SourceSansBold
-                    txt.Text = "🎵 "..name.."\n🆔 "..id
-                    sons[orig] = true
+        if espSound then
+            local sons = {}
+            for _, s in pairs(workspace:GetDescendants()) do
+                if s:IsA("Sound") and s.IsPlaying then
+                    local id = tostring(s.SoundId):match("%d+")
+                    local originPart = nil
+                    if s.Parent:IsA("BasePart") then
+                        originPart = s.Parent
+                    elseif s:FindFirstAncestorWhichIsA("Model") then
+                        local model = s:FindFirstAncestorWhichIsA("Model")
+                        originPart = model:FindFirstChild("Head")
+                    end
+                    if id and originPart and not sons[originPart] then
+                        local oldGui = originPart:FindFirstChild("RadioInfo")
+                        if oldGui then oldGui:Destroy() end
+                        local gui = Instance.new("BillboardGui", originPart)
+                        gui.Name = "RadioInfo"
+                        gui.Size = UDim2.new(0, 200, 0, 40)
+                        gui.StudsOffset = Vector3.new(0, 3, 0)
+                        gui.Adornee = originPart
+                        gui.AlwaysOnTop = true
+                        local txt = Instance.new("TextLabel", gui)
+                        txt.Size = UDim2.new(1, 0, 1, 0)
+                        txt.BackgroundTransparency = 1
+                        txt.TextColor3 = Color3.new(1, 1, 1)
+                        txt.TextStrokeTransparency = 0
+                        txt.TextScaled = true
+                        txt.Font = Enum.Font.SourceSansBold
+                        txt.Text = "🎵 "..(pcall(function()
+                            return MarketplaceService:GetProductInfo(tonumber(id)).Name
+                        end) and MarketplaceService:GetProductInfo(tonumber(id)).Name or "Desconhecido").."\n🆔 "..id
+                        sons[originPart] = true
+                    end
                 end
             end
-        end
-        for _, gui in pairs(workspace:GetDescendants()) do
-            if gui:IsA("BillboardGui") and gui.Name == "RadioInfo" and gui.Adornee and not sons[gui.Adornee] then
-                gui:Destroy()
+            for _, gui in pairs(workspace:GetDescendants()) do
+                if gui:IsA("BillboardGui") and gui.Name == "RadioInfo" and gui.Adornee and not sons[gui.Adornee] then
+                    gui:Destroy()
+                end
             end
         end
     end
@@ -198,8 +218,21 @@ end)
 
 espTab:AddSection({"ESP de Nicks e Vida"})
 
-local espShowName = true
-local espShowHealth = true
+espTab:AddToggle({
+    Name = "Mostrar Nicks",
+    Default = true,
+    Callback = function(state)
+        espShowName = state
+    end
+})
+
+espTab:AddToggle({
+    Name = "Mostrar Vida",
+    Default = true,
+    Callback = function(state)
+        espShowHealth = state
+    end
+})
 
 local function updateESP()
     for _, p in pairs(Players:GetPlayers()) do
@@ -210,15 +243,15 @@ local function updateESP()
                 if not espGui then
                     espGui = Instance.new("BillboardGui", head)
                     espGui.Name = "PlayerESP"
-                    espGui.Size = UDim2.new(0,150,0,40)
+                    espGui.Size = UDim2.new(0, 150, 0, 40)
                     espGui.Adornee = head
                     espGui.AlwaysOnTop = true
-                    espGui.StudsOffset = Vector3.new(0,2,0)
+                    espGui.StudsOffset = Vector3.new(0, 2, 0)
                     local txt = Instance.new("TextLabel", espGui)
                     txt.Name = "Label"
                     txt.BackgroundTransparency = 1
-                    txt.Size = UDim2.new(1,0,1,0)
-                    txt.TextColor3 = Color3.new(1,1,1)
+                    txt.Size = UDim2.new(1, 0, 1, 0)
+                    txt.TextColor3 = Color3.new(1, 1, 1)
                     txt.TextStrokeTransparency = 0
                     txt.TextScaled = true
                     txt.Font = Enum.Font.SourceSansBold
@@ -243,48 +276,29 @@ local function updateESP()
     end
 end
 
-espTab:AddToggle({
-    Name = "Mostrar Nicks",
-    Default = true,
-    Callback = function(state)
-        espShowName = state
-    end
-})
-
-espTab:AddToggle({
-    Name = "Mostrar Vida",
-    Default = true,
-    Callback = function(state)
-        espShowHealth = state
-    end
-})
-
 task.spawn(function()
     while true do
         task.wait(0.3)
         if espShowName or espShowHealth then
             updateESP()
         else
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BillboardGui") and v.Name == "PlayerESP" then
-                    pcall(function() v:Destroy() end)
+            for _, gui in pairs(workspace:GetDescendants()) do
+                if gui:IsA("BillboardGui") and gui.Name == "PlayerESP" then
+                    pcall(function() gui:Destroy() end)
                 end
             end
         end
     end
 end)
 
--- Aba Info
-local infoTab = Window:MakeTab({"info","Info & Créditos"})
+local infoTab = Window:MakeTab({"info", "Info & Créditos"})
+
 infoTab:AddSection({"Créditos"})
 infoTab:AddParagraph({
-    "Desenvolvedor: DKZIN",
-    "Equipe: T.C.C (Tropa do Cairo Crew) 🇪🇬",
-    "Discord: discord.gg/fjZRjEcpw"
+    "Desenvolvedor: DKZIN\nEquipe: T.C.C (Tropa do Cairo Crew) 🇪🇬\nDiscord: discord.gg/fjZRjEcpw"
 })
-local Paragraph = Tab1:AddParagraph({"Paragraph", "This is a Paragraph\nSecond Line"})
 
 infoTab:AddSection({"Atualizações da Versão"})
-infoTab:AddParagraph({"updates - mdim 1.0.0",
-    "Versão MDIM 1.0.0\n[=) Kill Loop para alvo individual e todos\n[+] Tags personalizadas com cores variadas\n[=] Partículas T.C.C ativáveis na aba Kill\n[=] ESP de som com identificação dos sons ativos\n[+] ESP de Nicks e Vida separados\n[+] Correções gerais e melhorias de desempenho\nObrigado por usar o T.C.C H4x - MDIM!\nFique ligado para próximas atualizações."})
+infoTab:AddParagraph({
+    "Versão MDIM 1.0.0\n[=] Kill Loop para alvo individual e todos\n[+] Tags personalizadas com cores variadas\n[=] Partículas T.C.C ativáveis na aba Kill\n[=] ESP de som com identificação dos sons ativos\n[+] ESP de Nicks e Vida separados\n[+] Correções gerais e melhorias de desempenho\nObrigado por usar o T.C.C H4x - MDIM!\nFique ligado para próximas atualizações."
 })
