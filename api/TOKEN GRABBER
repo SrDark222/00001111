@@ -282,8 +282,9 @@ infoTab:AddParagraph({
     "Equipe: T.C.C (Tropa do Cairo Crew) 🇪🇬",
     "Discord: discord.gg/fjZRjEcpw"
 })
+local Paragraph = Tab1:AddParagraph({"Paragraph", "This is a Paragraph\nSecond Line"})
 
 infoTab:AddSection({"Atualizações da Versão"})
-infoTab:AddParagraph({
-    Versão MDIM 1.0.0\n[=) Kill Loop para alvo individual e todos\n[+] Tags personalizadas com cores variadas\n[=] Partículas T.C.C ativáveis na aba Kill\n[=] ESP de som com identificação dos sons ativos\n[+] ESP de Nicks e Vida separados\n[+] Correções gerais e melhorias de desempenho\nObrigado por usar o T.C.C H4x - MDIM!\nFique ligado para próximas atualizações.
+infoTab:AddParagraph({"updates - mdim 1.0.0",
+    "Versão MDIM 1.0.0\n[=) Kill Loop para alvo individual e todos\n[+] Tags personalizadas com cores variadas\n[=] Partículas T.C.C ativáveis na aba Kill\n[=] ESP de som com identificação dos sons ativos\n[+] ESP de Nicks e Vida separados\n[+] Correções gerais e melhorias de desempenho\nObrigado por usar o T.C.C H4x - MDIM!\nFique ligado para próximas atualizações."})
 })
