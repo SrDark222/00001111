@@ -218,7 +218,7 @@ end
 
 -- Anti-Sit fix: bloqueia totalmente sentar (NoCanSit) sem bugar bancos nem simular sentar
 AntiTab:AddToggle({
-	Name = "Anti-Sit (NoCanSit real)",
+	Name = "Anti-Sit (Não funciona)",
 	Default = false,
 	Callback = function(state)
 		getgenv().AntiSit = state
