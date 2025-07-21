@@ -134,74 +134,147 @@ LocalPlayer.CharacterAdded:Connect(getCharacter)
 local AntiTab = Window:MakeTab({Name = "Anti", Icon = "rain"})
 AntiTab:AddSection({Name = "Proteções Contra Comandos Admin"})
 
+-- Anti Teleport corrigido: grava posição fixa, se teleportar muito longe, volta suavemente só 1 vez e espera nova alteração
 AntiTab:AddToggle({
-	Name = "Anti-tp (funciona)",
+	Name = "Anti-tp (corrigido)",
 	Default = false,
 	Callback = function(state)
 		getgenv().AntiTP = state
-		if state then
-			local lastPos = nil
-			local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-			while AntiTP and task.wait(0.00000002) do
-				local pos = hrp.Position
-				if lastPos and (pos - lastPos).Magnitude >= 20 then
-					local TweenService = game:GetService("TweenService")
-					local tween = TweenService:Create(hrp, TweenInfo.new(0.09, Enum.EasingStyle.Quad), {CFrame = CFrame.new(lastPos)})
-					tween:Play()
-				end
-				lastPos = pos
+		local TweenService = game:GetService("TweenService")
+		local Players = game:GetService("Players")
+		local lplr = Players.LocalPlayer
+		local hrp = nil
+		local lastPos = nil
+		local returning = false
+
+		-- Função para voltar suavemente pra posição salva
+		local function ReturnToLastPos()
+			if hrp and lastPos then
+				returning = true
+				local tween = TweenService:Create(hrp, TweenInfo.new(0.7, Enum.EasingStyle.Quad), {CFrame = CFrame.new(lastPos)})
+				tween:Play()
+				tween.Completed:Wait()
+				returning = false
 			end
 		end
+
+		task.spawn(function()
+			while getgenv().AntiTP do
+				if not hrp or not hrp.Parent then
+					hrp = lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart")
+					if not hrp then task.wait(0.1) continue end
+				end
+				if not lastPos then
+					lastPos = hrp.Position
+				end
+				if not returning then
+					local currentPos = hrp.Position
+					local dist = (currentPos - lastPos).Magnitude
+					if dist >= 20 then -- se teletransportou longe demais
+						ReturnToLastPos()
+					else
+						lastPos = currentPos -- atualiza posição normal
+					end
+				end
+				task.wait(0.15)
+			end
+		end)
 	end
 })
 
+-- Anti Void atualizado: só usa Tween para ir para último player, evita bugs e só tenta se estiver no void
 AntiTab:AddToggle({
-	Name = "Anti-Void (beta)",
+	Name = "Anti-Void (melhorado)",
 	Default = false,
 	Callback = function(state)
 		getgenv().AntiVoid = state
-		if state then
-			local RunService = game:GetService("RunService")
-			local lplr = game.Players.LocalPlayer
-			local function GetUltimo()
-				local all = game.Players:GetPlayers()
-				return all[#all]
-			end
-			local conn = RunService.Heartbeat:Connect(function()
-				if lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart") then
-					local posY = lplr.Character.HumanoidRootPart.Position.Y
-					if posY < -5 then
-						local target = GetUltimo()
-						if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-							local targetPos = target.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
-							local TweenService = game:GetService("TweenService")
-							local tween = TweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(0.7), {CFrame = CFrame.new(targetPos)})
-							tween:Play()
-						end
+		local RunService = game:GetService("RunService")
+		local TweenService = game:GetService("TweenService")
+		local Players = game:GetService("Players")
+		local lplr = Players.LocalPlayer
+		local conn
+
+		local function GetUltimo()
+			local all = Players:GetPlayers()
+			return all[#all]
+		end
+
+		conn = RunService.Heartbeat:Connect(function()
+			if not getgenv().AntiVoid then return end
+			if lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart") then
+				local hrp = lplr.Character.HumanoidRootPart
+				if hrp.Position.Y < -5 then
+					local target = GetUltimo()
+					if target and target ~= lplr and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+						local targetPos = target.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+						local tween = TweenService:Create(hrp, TweenInfo.new(0.7), {CFrame = CFrame.new(targetPos)})
+						tween:Play()
 					end
 				end
-			end)
-			repeat task.wait() until not getgenv().AntiVoid
-			conn:Disconnect()
-		end
-	end
+			end
+		end)
+end
 })
 
+-- Anti-Sit fix: bloqueia totalmente sentar (NoCanSit) sem bugar bancos nem simular sentar
 AntiTab:AddToggle({
-	Name = "Anti-Sit (beta)",
+	Name = "Anti-Sit (NoCanSit real)",
 	Default = false,
 	Callback = function(state)
 		getgenv().AntiSit = state
-		local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-		if hum then hum.Sit = false end
-		if state then
-			local conn
-			conn = hum:GetPropertyChangedSignal("Sit"):Connect(function()
-				if hum.Sit then hum.Sit = false end
-			end)
-			repeat task.wait() until not getgenv().AntiSit
-			if conn then conn:Disconnect() end
+		local Players = game:GetService("Players")
+		local lplr = Players.LocalPlayer
+		local hum = nil
+		local conn1, conn2
+
+		local function blockSit()
+			if hum then
+				hum.Sit = false
+				hum.PlatformStand = true -- bloqueia sentar e inclinar
+			end
 		end
+
+		local function unblockSit()
+			if hum then
+				hum.PlatformStand = false
+			end
+		end
+
+		local function setup()
+			if hum then
+				blockSit()
+				conn1 = hum:GetPropertyChangedSignal("Sit"):Connect(function()
+					if hum.Sit then
+						blockSit()
+					end
+				end)
+				conn2 = hum:GetPropertyChangedSignal("PlatformStand"):Connect(function()
+					if not getgenv().AntiSit then
+						unblockSit()
+					end
+				end)
+			end
+		end
+
+		task.spawn(function()
+			while true do
+				if not lplr.Character then task.wait(0.5) else break end
+			end
+			hum = lplr.Character:FindFirstChildOfClass("Humanoid")
+			setup()
+		end)
+
+		task.spawn(function()
+			while getgenv().AntiSit do
+				if hum and hum.Sit then
+					blockSit()
+				end
+				task.wait(0.1)
+			end
+			if conn1 then conn1:Disconnect() end
+			if conn2 then conn2:Disconnect() end
+			unblockSit()
+		end)
 	end
 })
 
