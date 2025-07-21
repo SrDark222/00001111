@@ -142,11 +142,11 @@ AntiTab:AddToggle({
 		if state then
 			local lastPos = nil
 			local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-			while AntiTP and task.wait(0.2) do
+			while AntiTP and task.wait(0.00000002) do
 				local pos = hrp.Position
-				if lastPos and (pos - lastPos).Magnitude >= 23 then
+				if lastPos and (pos - lastPos).Magnitude >= 20 then
 					local TweenService = game:GetService("TweenService")
-					local tween = TweenService:Create(hrp, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {CFrame = CFrame.new(lastPos)})
+					local tween = TweenService:Create(hrp, TweenInfo.new(0.09, Enum.EasingStyle.Quad), {CFrame = CFrame.new(lastPos)})
 					tween:Play()
 				end
 				lastPos = pos
