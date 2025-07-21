@@ -496,7 +496,7 @@ end
 
 espTab:AddToggle({
     Name = "Ativar ESP",
-    Default = true,
+    Default = false,
     Callback = function(state)
         espEnabled = state
         if not state then
