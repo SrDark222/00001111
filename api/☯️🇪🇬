@@ -1,0 +1,466 @@
+-- Cabeçalho e carregamento RedzLib
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/SrDark222/SH_0001/refs/heads/main/inject%20R.Hub.lua"))()
+local Window = redzlib:MakeWindow({
+    Title = "T.C.C H4x - MDIM",
+    SubTitle = "by DKZIN",
+    SaveFolder = "tcc_mdim.lua"
+})
+
+Window:AddMinimizeButton({
+    Button = { Image = "rbxassetid://10704761835", BackgroundTransparency = 0 },
+    Corner = { CornerRadius = UDim.new(0.4, 1) }
+})
+
+-- Serviços
+-- SERVICES
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local MarketplaceService = game:GetService("MarketplaceService")
+
+-- Variáveis
+local killTarget, killLoop, killAll = "", false, false
+local customTagName, tagColor = "", Color3.fromRGB(255, 0, 0)
+local espSound, espShowName, espShowHealth = false, true, true
+local colors = {
+    Vermelho = Color3.fromRGB(255,0,0),
+    Verde = Color3.fromRGB(0,255,0),
+    Azul = Color3.fromRGB(0,0,255),
+    Amarelo = Color3.fromRGB(255,255,0),
+    Roxo = Color3.fromRGB(128,0,128),
+    Laranja = Color3.fromRGB(255,165,0),
+    Branco = Color3.fromRGB(255,255,255),
+    Preto = Color3.fromRGB(0,0,0)
+}
+
+-- Função para atualizar lista de players no dropdown
+local function updatePlayerList(dropdown)
+    local list = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then table.insert(list, p.Name) end
+    end
+    for _, method in pairs({"Clear", "Add", "SetOptions", "Update", "Set", "Refresh"}) do
+        pcall(function() if dropdown[method] then dropdown[method](dropdown, list) end end)
+    end
+end
+
+-- Loop kill automático
+task.spawn(function()
+    while task.wait(0.1) do
+        if killLoop and killTarget ~= "" then
+            pcall(function()
+                LocalPlayer.Backpack:WaitForChild("Soco"):WaitForChild("DMG"):FireServer("Damage", killTarget)
+            end)
+        elseif killAll then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer then
+                    pcall(function()
+                        LocalPlayer.Backpack:WaitForChild("Soco"):WaitForChild("DMG"):FireServer("Damage", p.Name)
+                    end)
+                end
+            end
+        end
+    end
+end)
+
+-- Aba Principal Kill
+local killTab = Window:MakeTab({"kill", "code2"})
+killTab:AddSection({"Ataque"})
+
+local killDropdown = killTab:AddDropdown({
+    Name = "Selecionar Alvo",
+    Options = {},
+    Callback = function(value)
+        killTarget = value
+        killLoop = false
+        killAll = false
+    end
+})
+
+killTab:AddButton({
+    Name = "Atualizar Lista",
+    Callback = function()
+        updatePlayerList(killDropdown)
+    end
+})
+
+killTab:AddToggle({
+    Name = "Loop Kill Alvo",
+    Default = false,
+    Callback = function(state)
+        killLoop = state
+        if state then killAll = false end
+    end
+})
+
+killTab:AddToggle({
+    Name = "Loop Kill Todos",
+    Default = false,
+    Callback = function(state)
+        killAll = state
+        if state then killLoop = false end
+    end
+})
+
+
+
+
+
+
+
+
+
+
+-- DEPENDÊNCIAS / VARIÁVEIS
+local character, humanoidRootPart
+local lastPosition = nil
+local rollbackEnabled = false
+local antiVoidEnabled = false
+local antiSitEnabled = false
+local noCanSitEnabled = false
+-- FUNÇÕES DE ATUALIZAÇÃO DE PERSONAGEM
+local function getCharacter()
+	character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+end
+
+getCharacter()
+LocalPlayer.CharacterAdded:Connect(getCharacter)
+
+
+
+
+local AntiTab = Window:MakeTab({Name = "Anti", Icon = "rain"})
+AntiTab:AddSection({Name = "Proteções Contra Comandos Admin"})
+
+AntiTab:AddToggle({
+	Name = "Anti-tp (funciona)",
+	Default = false,
+	Callback = function(state)
+		getgenv().AntiTP = state
+		if state then
+			local lastPos = nil
+			local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+			while AntiTP and task.wait(0.2) do
+				local pos = hrp.Position
+				if lastPos and (pos - lastPos).Magnitude >= 23 then
+					local TweenService = game:GetService("TweenService")
+					local tween = TweenService:Create(hrp, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {CFrame = CFrame.new(lastPos)})
+					tween:Play()
+				end
+				lastPos = pos
+			end
+		end
+	end
+})
+
+AntiTab:AddToggle({
+	Name = "Anti-Void (beta)",
+	Default = false,
+	Callback = function(state)
+		getgenv().AntiVoid = state
+		if state then
+			local RunService = game:GetService("RunService")
+			local lplr = game.Players.LocalPlayer
+			local function GetUltimo()
+				local all = game.Players:GetPlayers()
+				return all[#all]
+			end
+			local conn = RunService.Heartbeat:Connect(function()
+				if lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart") then
+					local posY = lplr.Character.HumanoidRootPart.Position.Y
+					if posY < -5 then
+						local target = GetUltimo()
+						if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+							local targetPos = target.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+							local TweenService = game:GetService("TweenService")
+							local tween = TweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(0.7), {CFrame = CFrame.new(targetPos)})
+							tween:Play()
+						end
+					end
+				end
+			end)
+			repeat task.wait() until not getgenv().AntiVoid
+			conn:Disconnect()
+		end
+	end
+})
+
+AntiTab:AddToggle({
+	Name = "Anti-Sit (beta)",
+	Default = false,
+	Callback = function(state)
+		getgenv().AntiSit = state
+		local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+		if hum then hum.Sit = false end
+		if state then
+			local conn
+			conn = hum:GetPropertyChangedSignal("Sit"):Connect(function()
+				if hum.Sit then hum.Sit = false end
+			end)
+			repeat task.wait() until not getgenv().AntiSit
+			if conn then conn:Disconnect() end
+		end
+	end
+})
+
+
+-- Tags Personalizadas
+killTab:AddSection({"Tags Personalizadas"})
+
+killTab:AddTextBox({
+    Name = "Texto da Tag",
+    PlaceholderText = "Sua tag aqui",
+    Callback = function(value)
+        customTagName = value
+    end
+})
+
+killTab:AddDropdown({
+    Name = "Cor da Tag",
+    Options = (function()
+        local t = {}
+        for k in pairs(colors) do table.insert(t, k) end
+        return t
+    end)(),
+    Callback = function(value)
+        tagColor = colors[value] or Color3.fromRGB(255, 0, 0)
+    end
+})
+
+killTab:AddButton({
+    Name = "Aplicar Tag",
+    Callback = function()
+        if customTagName ~= "" then
+            pcall(function()
+                ReplicatedStorage:WaitForChild("RemoteEvent"):WaitForChild("Shop"):WaitForChild("Tag"):FireServer(tagColor, 1000, customTagName)
+            end)
+        end
+    end
+})
+
+-- Partículas T.C.C
+killTab:AddSection({"Partículas T.C.C"})
+
+killTab:AddButton({
+    Name = "Ativar Partículas T.C.C",
+    Callback = function()
+        local effectId = "rbxassetid://100971981026789"
+        pcall(function()
+            local remote = ReplicatedStorage:WaitForChild("RemoteEvent"):WaitForChild("Shop"):WaitForChild("Effect")
+            remote:FireServer(effectId, 0)
+            remote:FireServer(effectId, 0)
+        end)
+    end
+})
+
+-- Aba ESP
+local espTab = Window:MakeTab({"esp", "eye"})
+espTab:AddSection({"ESP de Som"})
+
+espTab:AddToggle({
+    Name = "ESP de Som",
+    Default = false,
+    Callback = function(state)
+        espSound = state
+        if not state then
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BillboardGui") and v.Name == "RadioInfo" then
+                    pcall(function() v:Destroy() end)
+                end
+            end
+        end
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) do
+        if espSound then
+            local sons = {}
+            for _, s in pairs(workspace:GetDescendants()) do
+                if s:IsA("Sound") and s.IsPlaying then
+                    local id = tostring(s.SoundId):match("%d+")
+                    local originPart = nil
+                    if s.Parent:IsA("BasePart") then
+                        originPart = s.Parent
+                    elseif s:FindFirstAncestorWhichIsA("Model") then
+                        local model = s:FindFirstAncestorWhichIsA("Model")
+                        originPart = model:FindFirstChild("Head")
+                    end
+                    if id and originPart and not sons[originPart] then
+                        local oldGui = originPart:FindFirstChild("RadioInfo")
+                        if oldGui then oldGui:Destroy() end
+                        local gui = Instance.new("BillboardGui", originPart)
+                        gui.Name = "RadioInfo"
+                        gui.Size = UDim2.new(0, 200, 0, 40)
+                        gui.StudsOffset = Vector3.new(0, 3, 0)
+                        gui.Adornee = originPart
+                        gui.AlwaysOnTop = true
+                        local txt = Instance.new("TextLabel", gui)
+                        txt.Size = UDim2.new(1, 0, 1, 0)
+                        txt.BackgroundTransparency = 1
+                        txt.TextColor3 = Color3.new(1, 1, 1)
+                        txt.TextStrokeTransparency = 0
+                        txt.TextScaled = true
+                        txt.Font = Enum.Font.SourceSansBold
+                        txt.Text = "🎵 ID: "..(id or "Desconhecido")
+                        sons[originPart] = true
+                    end
+                end
+            end
+            for _, gui in pairs(workspace:GetDescendants()) do
+                if gui:IsA("BillboardGui") and gui.Name == "RadioInfo" and gui.Adornee and not sons[gui.Adornee] then
+                    gui:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+espTab:AddSection({"ESP"})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+local espEnabled = false
+local highlightInstances = {}
+
+local function createBillboardGui(parent, text)
+    local gui = Instance.new("BillboardGui")
+    gui.Name = "PlayerESP"
+    gui.Adornee = parent
+    gui.Size = UDim2.new(0, 150, 0, 40)
+    gui.StudsOffset = Vector3.new(0, 2, 0)
+    gui.AlwaysOnTop = true
+
+    local label = Instance.new("TextLabel", gui)
+    label.Name = "Label"
+    label.Size = UDim2.new(1,0,1,0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.new(1,1,1)
+    label.TextStrokeTransparency = 0
+    label.TextScaled = true
+    label.Font = Enum.Font.SourceSansBold
+    label.Text = text
+
+    return gui
+end
+
+local function createTracer()
+    local line = Drawing.new("Line")
+    line.Visible = false
+    line.Color = Color3.fromRGB(255, 0, 0)
+    line.Thickness = 1.5
+    line.Transparency = 1
+    return line
+end
+
+local tracers = {}
+
+local function updateESP()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = p.Character.HumanoidRootPart
+
+            -- Highlight
+            if not highlightInstances[p] then
+                local hl = Instance.new("Highlight")
+                hl.Name = "TCCHighlight"
+                hl.Adornee = p.Character
+                hl.FillColor = Color3.fromRGB(255, 0, 0)
+                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                hl.FillTransparency = 0.6
+                hl.OutlineTransparency = 0.3
+                hl.Parent = workspace
+                highlightInstances[p] = hl
+            end
+
+            -- BillboardGui
+            local head = p.Character:FindFirstChild("Head")
+            if head then
+                local espGui = head:FindFirstChild("PlayerESP")
+                local text = p.Name .. "\nID: " .. tostring(p.UserId)
+                if not espGui then
+                    espGui = createBillboardGui(head, text)
+                    espGui.Parent = head
+                else
+                    espGui.Label.Text = text
+                end
+            end
+
+            -- Tracer
+            local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+            if onScreen then
+                if not tracers[p] then
+                    tracers[p] = createTracer()
+                end
+                tracers[p].From = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y)
+                tracers[p].To = Vector2.new(screenPos.X, screenPos.Y)
+                tracers[p].Visible = true
+            elseif tracers[p] then
+                tracers[p].Visible = false
+            end
+        else
+            -- Limpa tudo se o player sumir ou for local
+            if highlightInstances[p] then
+                highlightInstances[p]:Destroy()
+                highlightInstances[p] = nil
+            end
+            if tracers[p] then
+                tracers[p]:Remove()
+                tracers[p] = nil
+            end
+            if p.Character and p.Character:FindFirstChild("Head") then
+                local espGui = p.Character.Head:FindFirstChild("PlayerESP")
+                if espGui then espGui:Destroy() end
+            end
+        end
+    end
+end
+
+espTab:AddToggle({
+    Name = "Ativar ESP",
+    Default = true,
+    Callback = function(state)
+        espEnabled = state
+        if not state then
+            -- Remove tudo
+            for _, hl in pairs(highlightInstances) do
+                hl:Destroy()
+            end
+            highlightInstances = {}
+
+            for _, line in pairs(tracers) do
+                line:Remove()
+            end
+            tracers = {}
+
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Character and p.Character:FindFirstChild("Head") then
+                    local espGui = p.Character.Head:FindFirstChild("PlayerESP")
+                    if espGui then espGui:Destroy() end
+                end
+            end
+        end
+    end
+})
+
+RunService.RenderStepped:Connect(function()
+    if espEnabled then
+        updateESP()
+    end
+end)
+local infoTab = Window:MakeTab({"info", "Info"})
+
+infoTab:AddSection({"Créditos"})
+infoTab:AddParagraph({
+    "Desenvolvedor: DKZIN\nEquipe: T.C.C (Tropa do Cairo Crew) 🇪🇬\nDiscord: discord.gg/fjZRjEcpw"
+})
+
+infoTab:AddSection({"Atualizações da Versão"})
+infoTab:AddParagraph({
+    "Versão MDIM 1.0.0\n[=] Kill Loop para alvo individual e todos\n[+] Tags personalizadas com cores variadas\n[=] Partículas T.C.C ativáveis na aba Kill\n[=] ESP de som com identificação dos sons ativos\n[+] ESP de Nicks e Vida separados\n[+] Correções gerais e melhorias de desempenho\nObrigado por usar o T.C.C H4x - MDIM!\nFique ligado para próximas atualizações."
+})
