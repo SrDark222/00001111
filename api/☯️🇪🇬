@@ -162,7 +162,7 @@ AntiTab:AddToggle({
 			while getgenv().AntiTP do
 				if not hrp or not hrp.Parent then
 					hrp = lplr.Character and lplr.Character:FindFirstChild("HumanoidRootPart")
-					if not hrp then task.wait(0.1) continue end
+					if not hrp then task.wait(0.01) continue end
 				end
 				if not lastPos then
 					lastPos = hrp.Position
@@ -176,7 +176,7 @@ AntiTab:AddToggle({
 						lastPos = currentPos -- atualiza posição normal
 					end
 				end
-				task.wait(0.15)
+				task.wait(0.05)
 			end
 		end)
 	end
