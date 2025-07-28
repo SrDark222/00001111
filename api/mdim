@@ -92,6 +92,8 @@ Window:AddMinimizeButton({
 
 local killTab = Window:MakeTab({"kill", "code2"})
 
+
+local Section = killTab:AddSection({"INFOS - PRINCIPAIS"})
 local Frame = Instance.new("Frame", killTab.Cont)
 Frame.Size = UDim2.new(1, -24, 0, 140)
 Frame.Position = UDim2.new(0, 12, 0, 12)
@@ -273,7 +275,7 @@ LocalPlayer.CharacterAdded:Connect(getCharacter)
 
 
 
-local AntiTab = Window:MakeTab({Name = "Anti", Icon = "rain"})
+local AntiTab = Window:MakeTab({"anti", "rain"})
 AntiTab:AddSection({Name = "Proteções Contra Comandos Admin"})
 
 -- Anti Teleport corrigido: grava posição fixa, se teleportar muito longe, volta suavemente só 1 vez e espera nova alteração
@@ -358,6 +360,8 @@ AntiTab:AddToggle({
 end
 })
 
+
+local Section = AntiTab:AddSection({"Em beta ainda"})
 -- Anti-Sit fix: bloqueia totalmente sentar (NoCanSit) sem bugar bancos nem simular sentar
 AntiTab:AddToggle({
 	Name = "Anti-Sit (Não funciona)",
@@ -668,11 +672,202 @@ RunService.RenderStepped:Connect(function()
         updateESP()
     end
 end)
+
+
+
+
+
+
+
+
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+local SpamTab = Window:MakeTab({ "spam", "message-circle" })
+local Section = SpamTab:AddSection({"SELECIONAR ALVO"})
+--// Variáveis
+local alvoSelecionado = nil
+local prefix = ";"
+local spamando = false
+local posAntiga = nil
+local mataAereoAtivo = false
+
+--// Pega lista de players
+local function getPlayerList()
+	local players = {}
+	for _, v in ipairs(Players:GetPlayers()) do
+		if v ~= LocalPlayer then
+			table.insert(players, v.Name)
+		end
+	end
+	return players
+end
+
+--// Corta nome pela metade
+local function cortarMetade(nome)
+	return string.sub(nome, 1, math.floor(#nome / 2)):lower()
+end
+
+--// Envia comando
+local function sendChat(msg)
+	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+		TextChatService.TextChannels.RBXGeneral:SendAsync(msg)
+	else
+		ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
+	end
+end
+
+--// Dropdown alvo
+local spamDropdown = SpamTab:AddDropdown({
+	Name = "Alvo do Spam",
+	Options = getPlayerList(),
+	Callback = function(Value)
+		alvoSelecionado = Value
+	end
+})
+
+--// Atualiza dropdown
+SpamTab:AddButton({
+	Name = "Atualizar Lista",
+	Callback = function()
+		local novaLista = getPlayerList()
+		local jeitosDeAtualizar = {
+			function()
+				if spamDropdown.Clear and spamDropdown.Add then
+					spamDropdown:Clear()
+					for _, jogador in ipairs(novaLista) do
+						spamDropdown:Add(jogador)
+					end
+				end
+			end,
+			function()
+				if spamDropdown.SetOptions then
+					spamDropdown:SetOptions(novaLista)
+				end
+			end,
+			function()
+				if spamDropdown.Update then
+					spamDropdown:Update(novaLista)
+				end
+			end,
+			function()
+				if spamDropdown.Set then
+					spamDropdown:Set(novaLista)
+				end
+			end,
+			function()
+				spamDropdown.Options = novaLista
+				if spamDropdown.Refresh then
+					spamDropdown:Refresh()
+				end
+			end
+		}
+		for _, f in ipairs(jeitosDeAtualizar) do pcall(f) end
+	end
+})
+
+local Section = SpamTab:AddSection({"prefixo & execução"})
+
+
+
+--// Prefixo
+SpamTab:AddTextBox({
+	Name = "Prefixo (ex: ; ou / )",
+	Description = "Digite o prefixo que você usa",
+	PlaceholderText = ";",
+	Callback = function(Value)
+		prefix = tostring(Value or ";"):sub(1,1)
+	end
+})
+
+--// Toggle
+SpamTab:AddToggle({
+	Name = "Ativar Matar Aéreo",
+	Default = false,
+	Callback = function(state)
+		spamando = state
+		local localHRP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+		if spamando then
+			local player = Players:FindFirstChild(alvoSelecionado)
+			if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and localHRP then
+				posAntiga = localHRP.CFrame
+				mataAereoAtivo = true
+
+				local alvoCortado = cortarMetade(player.Name)
+				local localCortado = cortarMetade(LocalPlayer.Name)
+
+				local targetPos = Vector3.new(-1283, -363, -364)
+
+				-- Loop de teleport no void
+				task.spawn(function()
+					while spamando do
+						localHRP.CFrame = CFrame.new(targetPos)
+						task.wait(0.00001)
+					end
+				end)
+
+				-- Loop de proteção (congelar player)
+				task.spawn(function()
+					task.wait(0.01)
+					while spamando do
+						if localHRP then
+							localHRP.Anchored = true
+						end
+						task.wait(0.1)
+					end
+					if localHRP then
+						localHRP.Anchored = false
+					end
+				end)
+
+				-- Loop comandos: tp + fly nan
+				task.spawn(function()
+					while spamando do
+						sendChat(prefix .. "tp " .. alvoCortado .. " " .. localCortado)
+						task.wait(0.5)
+						sendChat(prefix .. "fly " .. alvoCortado .. " nan")
+						task.wait(1)
+					end
+				end)
+
+				-- Reset ao desligar
+				task.spawn(function()
+					repeat task.wait() until not spamando
+					if localHRP then
+						localHRP.Anchored = false
+						localHRP.CFrame = posAntiga
+					end
+					mataAereoAtivo = false
+				end)
+			else
+				spamando = false
+			end
+		else
+			if mataAereoAtivo and posAntiga and localHRP then
+				localHRP.Anchored = false
+				localHRP.CFrame = posAntiga
+				mataAereoAtivo = false
+			end
+		end
+	end
+})
+
+
+
+
+
+
+
 local infoTab = Window:MakeTab({"info", "Info"})
 
 infoTab:AddSection({"Créditos"})
 infoTab:AddParagraph({
-    "Desenvolvedor: DKZIN\nEquipe: T.C.C (Tropa do Cairo Crew) 🇪🇬\nDiscord: discord.gg/fjZRjEcpw"
+    "Desenvolvedor: DKZIN\nDesenvolvedor: RREZE\nEquipe: T.C.C (TERCEIRO COMANDO DA CAPITAL) 🇪🇬\nDiscord: discord.gg/fjZRjEcpw"
 })
 
 infoTab:AddSection({"Atualizações da Versão"})
