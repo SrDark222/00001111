@@ -476,66 +476,132 @@ killTab:AddButton({
 
 -- Aba ESP
 local espTab = Window:MakeTab({"esp", "eye"})
-espTab:AddSection({"ESP de Som"})
+
+
+
+
+
+local MarketplaceService = game:GetService("MarketplaceService")
+
+espTab:AddSection({ "ESP de Som" })
 
 espTab:AddToggle({
-    Name = "ESP de Som",
-    Default = false,
-    Callback = function(state)
-        espSound = state
-        if not state then
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BillboardGui") and v.Name == "RadioInfo" then
-                    pcall(function() v:Destroy() end)
-                end
-            end
-        end
-    end
+	Name = "ESP de Som",
+	Default = false,
+	Callback = function(state)
+		espSound = state
+		if not state then
+			for _, v in pairs(workspace:GetDescendants()) do
+				if v:IsA("BillboardGui") and v.Name == "RadioInfo" then
+					pcall(function() v:Destroy() end)
+				end
+			end
+		end
+	end
 })
 
+-- cache pra não ficar chamando API toda hora
+local audioNameCache = {}
+
+function getAudioNameFromId(id)
+	if audioNameCache[id] then
+		return audioNameCache[id]
+	end
+
+	local success, info = pcall(function()
+		return MarketplaceService:GetProductInfo(tonumber(id))
+	end)
+
+	local name = (success and info and info.Name) and info.Name or "Audio Desconhecido"
+	audioNameCache[id] = name
+	return name
+end
+
 task.spawn(function()
-    while task.wait(0.5) do
-        if espSound then
-            local sons = {}
-            for _, s in pairs(workspace:GetDescendants()) do
-                if s:IsA("Sound") and s.IsPlaying then
-                    local id = tostring(s.SoundId):match("%d+")
-                    local originPart = nil
-                    if s.Parent:IsA("BasePart") then
-                        originPart = s.Parent
-                    elseif s:FindFirstAncestorWhichIsA("Model") then
-                        local model = s:FindFirstAncestorWhichIsA("Model")
-                        originPart = model:FindFirstChild("Head")
-                    end
-                    if id and originPart and not sons[originPart] then
-                        local oldGui = originPart:FindFirstChild("RadioInfo")
-                        if oldGui then oldGui:Destroy() end
-                        local gui = Instance.new("BillboardGui", originPart)
-                        gui.Name = "RadioInfo"
-                        gui.Size = UDim2.new(0, 200, 0, 40)
-                        gui.StudsOffset = Vector3.new(0, 3, 0)
-                        gui.Adornee = originPart
-                        gui.AlwaysOnTop = true
-                        local txt = Instance.new("TextLabel", gui)
-                        txt.Size = UDim2.new(1, 0, 1, 0)
-                        txt.BackgroundTransparency = 1
-                        txt.TextColor3 = Color3.new(1, 1, 1)
-                        txt.TextStrokeTransparency = 0
-                        txt.TextScaled = true
-                        txt.Font = Enum.Font.SourceSansBold
-                        txt.Text = "🎵 ID: "..(id or "Desconhecido")
-                        sons[originPart] = true
-                    end
-                end
-            end
-            for _, gui in pairs(workspace:GetDescendants()) do
-                if gui:IsA("BillboardGui") and gui.Name == "RadioInfo" and gui.Adornee and not sons[gui.Adornee] then
-                    gui:Destroy()
-                end
-            end
-        end
-    end
+	while task.wait(0.5) do
+		if espSound then
+			local sons = {}
+
+			for _, s in pairs(workspace:GetDescendants()) do
+				if s:IsA("Sound") and s.IsPlaying and s.SoundId ~= "" then
+					local id = tostring(s.SoundId):match("%d+")
+					local originPart = nil
+
+					if s.Parent:IsA("BasePart") then
+						originPart = s.Parent
+					elseif s:FindFirstAncestorWhichIsA("Model") then
+						local model = s:FindFirstAncestorWhichIsA("Model")
+						originPart = model:FindFirstChild("Head") or model:FindFirstChildOfClass("BasePart")
+					end
+
+					if id and originPart and not sons[originPart] then
+						local audioName = getAudioNameFromId(id)
+
+						local oldGui = originPart:FindFirstChild("RadioInfo")
+						if oldGui then oldGui:Destroy() end
+
+						local gui = Instance.new("BillboardGui", originPart)
+						gui.Name = "RadioInfo"
+						gui.Size = UDim2.new(0, 0, 0, 0)
+						gui.StudsOffset = Vector3.new(0, 3, 0)
+						gui.Adornee = originPart
+						gui.AlwaysOnTop = true
+
+						local container = Instance.new("Frame", gui)
+						container.BackgroundTransparency = 1
+						container.Size = UDim2.new(1, 0, 1, 0)
+
+						local nameLabel = Instance.new("TextLabel", container)
+						nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+						nameLabel.Position = UDim2.new(0, 0, 0, 0)
+						nameLabel.BackgroundTransparency = 1
+						nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+						nameLabel.TextStrokeTransparency = 0.5
+						nameLabel.TextScaled = true
+						nameLabel.Font = Enum.Font.SourceSansBold
+						nameLabel.Text = audioName
+
+						local idLabel = Instance.new("TextLabel", container)
+						idLabel.Size = UDim2.new(1, 0, 0.5, 0)
+						idLabel.Position = UDim2.new(0, 0, 0.5, 0)
+						idLabel.BackgroundTransparency = 1
+						idLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+						idLabel.TextStrokeTransparency = 0.6
+						idLabel.TextScaled = true
+						idLabel.Font = Enum.Font.SourceSans
+						idLabel.Text = "ID: " .. id
+
+						local function updateGuiSize()
+							local maxText = #audioName > #id and audioName or id
+							local textLen = math.clamp(#maxText, 6, 20)
+							local px = 8 * textLen
+							gui.Size = UDim2.new(0, px, 0, 40)
+						end
+
+						updateGuiSize()
+						sons[originPart] = true
+					end
+				end
+			end
+
+			-- limpa os Gui antigos
+			for _, gui in pairs(workspace:GetDescendants()) do
+				if gui:IsA("BillboardGui") and gui.Name == "RadioInfo" and gui.Adornee and not sons[gui.Adornee] then
+					gui:Destroy()
+				end
+			end
+		end
+	end
 end)
+
+
+
+
+
+
+
+
+
 
 espTab:AddSection({"ESP"})
 
